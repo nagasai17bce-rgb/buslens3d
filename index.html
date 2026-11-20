@@ -23,7 +23,7 @@ header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-it
  <section class="card"><div class="section-title">Seat insights</div><div class="insight">✓ Compare upper and lower berths</div><div class="insight">✓ Inspect window-side positions</div><div class="insight">✓ See price and availability per berth</div><div class="insight">✓ Rotate the reconstructed cabin</div></section>
 </aside>
 <main class="center">
- <div class="toolbar"><button class="tab active" id="view3d" onclick="setView('3d')">3D view</button><button class="tab" id="viewmap" onclick="setView('map')">Seat map</button><button class="tab" onclick="resetCamera()">Reset view</button></div>
+ <div class="toolbar"><button class="tab active" id="view3d" onclick="setView('3d')">3D bus</button><button class="tab" id="viewinterior" onclick="setBusMode('interior')">Interior cutaway</button><button class="tab" id="viewmap" onclick="setView('map')">Seat map</button><button class="tab" onclick="resetCamera()">Reset view</button></div>
  <div class="stage" id="stage"><canvas id="scene"></canvas><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span>Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
  <div class="seatmap" id="seatmap"><div class="mapdecks"><div class="deckmap"><h3>LOWER BERTH</h3><div class="mapgrid" id="lowergrid"></div></div><div class="deckmap"><h3>UPPER BERTH</h3><div class="mapgrid" id="uppergrid"></div></div></div><div class="footnote">Approximate arrangement transcribed from the supplied MakeMyTrip seat-map screenshot. Grey = unavailable; blue = available; pink = women-only; neutral = uncertain.</div></div>
  <div class="deckswitch"><button class="deckbtn active" id="lowerbtn" onclick="switchDeck('lower')">Lower deck</button><button class="deckbtn" id="upperbtn" onclick="switchDeck('upper')">Upper deck</button><button class="deckbtn" onclick="switchDeck('both')">Both decks</button></div>
@@ -51,7 +51,7 @@ const key=new THREE.DirectionalLight(0xffe3bd,3.2);key.position.set(5,12,7);key.
 const fill=new THREE.DirectionalLight(0x75a9ff,1.5);fill.position.set(-8,6,-7);scene.add(fill);
 const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
-const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup;let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(10,8,13),target:new THREE.Vector3(0,2.45,0)};let cameraMotion=0;let inspecting=false;
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(10,8,13),target:new THREE.Vector3(0,2.45,0)};let cameraMotion=0;let inspecting=false;
 const data={
  lower:[
   {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
@@ -84,6 +84,22 @@ function makeBerth(deck,s){
  const hit=new THREE.Mesh(new THREE.BoxGeometry(width+.16,.55,length+.16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.set(s.x,y+.27,s.z);hit.userData={deck,seat:s};group.add(hit);berthMeshes.push(hit);
  group.userData={deck,id:s.id,halo,mattress:mattressMesh};berthGroups.push(group);root.add(group);
 }
+function buildExterior(){
+ exteriorGroup=new THREE.Group();root.add(exteriorGroup);
+ const cream=mat('#e9e0d0',.42,.12),maroon=mat('#692d38',.4,.16),dark=mat('#18212d',.3,.35),chrome=mat('#b8c0c8',.25,.7),lamp=mat('#fff0bd',.25,.1);
+ box(exteriorGroup,4.85,.7,12.5,0,.72,0,cream);box(exteriorGroup,4.87,.3,12.5,0,1.15,0,maroon);box(exteriorGroup,4.85,.28,12.5,0,4.55,0,cream);box(exteriorGroup,4.82,.12,12.5,0,4.73,0,dark);
+ for(const side of [-1,1]){
+  const x=side*2.4;box(exteriorGroup,.12,1.05,12,x,1.62,0,cream);box(exteriorGroup,.14,.2,12,x,2.2,0,maroon);box(exteriorGroup,.1,.24,12,x,4.3,0,cream);
+  for(let z=-5;z<=5;z+=2){box(exteriorGroup,.055,1.75,1.68,x,3.25,z,glassMat);box(exteriorGroup,.1,1.88,.09,x,3.25,z-.88,maroon);box(exteriorGroup,.1,1.88,.09,x,3.25,z+.88,maroon);box(exteriorGroup,.12,.08,1.82,x,4.13,z,chrome,false);}
+  const cv=document.createElement('canvas');cv.width=1024;cv.height=160;const cx=cv.getContext('2d');cx.clearRect(0,0,1024,160);cx.fillStyle='#692d38';cx.font='bold 78px Georgia';cx.textAlign='center';cx.fillText('JAI SAI BABA',512,108);
+  const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;const sign=new THREE.Mesh(new THREE.PlaneGeometry(3.6,.56),new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide}));sign.position.set(side*2.47,1.65,0);sign.rotation.y=side*Math.PI/2;exteriorGroup.add(sign);
+ }
+ box(exteriorGroup,3.8,1.25,.12,0,3.55,-6.27,glassMat);box(exteriorGroup,3.95,.28,.15,0,4.3,-6.28,dark);box(exteriorGroup,2.5,.2,.17,0,4.31,-6.38,maroon);box(exteriorGroup,4.3,.22,.3,0,.48,-6.28,chrome);
+ for(const x of [-1.7,1.7])box(exteriorGroup,.5,.28,.14,x,1.12,-6.28,lamp);
+ box(exteriorGroup,2.55,1.05,.12,0,3.55,6.27,glassMat);for(const x of [-1.75,1.75])box(exteriorGroup,.4,.7,.14,x,1.3,6.28,maroon);
+ for(const z of [-4.15,4.15])for(const x of [-2.43,2.43]){const tyre=new THREE.Mesh(new THREE.CylinderGeometry(.57,.57,.28,40),dark);tyre.rotation.z=Math.PI/2;tyre.position.set(x,.58,z);tyre.castShadow=true;exteriorGroup.add(tyre);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.29,.29,.3,32),chrome);hub.rotation.z=Math.PI/2;hub.position.set(x,.58,z);exteriorGroup.add(hub);}
+ for(const side of [-1,1]){box(exteriorGroup,.1,.1,.65,side*2.55,3.86,-5.55,dark);for(const z of [-5,-3,-1,1,3,5])box(exteriorGroup,.04,.1,.16,side*2.48,2.36,z,lamp,false);}
+}
 function build(){
  lowerDeckGroup=new THREE.Group();upperDeckGroup=new THREE.Group();
  function makeDeck(g,y){
@@ -105,13 +121,9 @@ function build(){
   s.x=laneX[prefix];const n=parseInt(s.id.replace(/^[A-Z]+/,''),10);s.z=-4.55+(n-1)*1.82;s.long=true;makeBerth(d,s);
  }
  box(root,4.55,.22,12,0,-.08,0,mat('#202a38'));
- for(const z of [-4.15,4.15])for(const x of [-2.25,2.25]){
-  const tire=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,32),mat('#151b24',.95));tire.rotation.z=Math.PI/2;tire.position.set(x,.35,z);tire.castShadow=true;root.add(tire);
-  const hub=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.235,24),mat('#aab3bf',.35,.65));hub.rotation.z=Math.PI/2;hub.position.set(x,.35,z);root.add(hub);
- }
- box(root,2.1,1.25,.65,0,.88,-6.1,glassMat);box(root,1.5,.35,.55,0,.52,-5.72,mat('#263444'));
+ buildExterior();
 }
-build();controls.target.copy(initialCamera.target);controls.update();controls.saveState();
+build();setBusMode('exterior');controls.target.copy(initialCamera.target);controls.update();controls.saveState();
 function setSelected(deck,id,openInspection=false){
  const s=data[deck].find(v=>v.id===id);if(!s)return;
  if(s.status==='booked'){toast('This berth is marked unavailable in the supplied seat map.');return;}
@@ -130,6 +142,14 @@ function switchDeck(d,preserveSelection=false){
  berthGroups.forEach(g=>{g.visible=d==='both'||g.userData.deck===d;});
  if(!preserveSelection&&d!=='both'){const match=data[d].find(s=>s.status==='available'||s.status==='female');if(match)setSelected(d,match.id);}
 }
+function setBusMode(mode){
+ busMode=mode;
+ if(exteriorGroup){exteriorGroup.visible=true;exteriorGroup.children.forEach(obj=>{const nearSide=obj.position.x>2.3&&obj.position.y>2.0;const roof=obj.position.y>4.4;obj.visible=mode==='exterior'||(!nearSide&&!roof);});}
+ document.querySelector('#view3d').classList.toggle('active',mode==='exterior');document.querySelector('#viewinterior').classList.toggle('active',mode==='interior');
+ document.querySelector('#stagehint').textContent=mode==='exterior'?'JAI SAI BABA · FULL 3D EXTERIOR':'JAI SAI BABA · INTERIOR CUTAWAY · BOTH DECKS';
+ if(mode==='interior'){lowerDeckGroup.visible=true;upperDeckGroup.visible=true;berthGroups.forEach(g=>g.visible=true);controls.minDistance=3;controls.maxDistance=19;}
+ else{lowerDeckGroup.visible=false;upperDeckGroup.visible=false;berthGroups.forEach(g=>g.visible=false);controls.minDistance=4;controls.maxDistance=24;}
+}
 function setView(v){const is3d=v==='3d';document.querySelector('#stage').style.display=is3d?'block':'none';document.querySelector('#seatmap').style.display=is3d?'none':'block';document.querySelector('#view3d').classList.toggle('active',is3d);document.querySelector('#viewmap').classList.toggle('active',!is3d);}
 let cameraAnimating=false;
 function moveCamera(position,target,duration=900){
@@ -137,7 +157,7 @@ function moveCamera(position,target,duration=900){
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,position,ease);controls.target.lerpVectors(fromTarget,target,ease);camera.lookAt(controls.target);if(t<1)requestAnimationFrame(step);else{cameraAnimating=false;controls.enabled=true;controls.update();}}
  requestAnimationFrame(step);
 }
-function inspectSelected(){const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;setView('3d');switchDeck(selected.deck,true);const g=berthGroups.find(v=>v.userData.deck===selected.deck&&v.userData.id===selected.id);if(!g)return;const y=selected.deck==='lower'?.78:3.18;const aisleX=s.x<-1?-.58:.36;const zOffset=s.z>3?-1.65:1.65;const target=new THREE.Vector3(s.x,y+.22,s.z);const pos=new THREE.Vector3(aisleX,y+1.02,s.z+zOffset);controls.minDistance=.55;controls.maxDistance=7.5;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI-.08;controls.enableRotate=true;controls.enableZoom=true;controls.enablePan=true;inspecting=true;document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=false;document.querySelector('#stagehint').textContent=selected.id+' · '+selected.deck.toUpperCase()+' BERTH INTERIOR · DRAG TO ORBIT';moveCamera(pos,target,1050);}
+function inspectSelected(){const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;setView('3d');setBusMode('interior');switchDeck(selected.deck,true);const g=berthGroups.find(v=>v.userData.deck===selected.deck&&v.userData.id===selected.id);if(!g)return;const y=selected.deck==='lower'?.78:3.18;const aisleX=s.x<-1?-.58:.36;const zOffset=s.z>3?-1.65:1.65;const target=new THREE.Vector3(s.x,y+.22,s.z);const pos=new THREE.Vector3(aisleX,y+1.02,s.z+zOffset);controls.minDistance=.55;controls.maxDistance=7.5;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI-.08;controls.enableRotate=true;controls.enableZoom=true;controls.enablePan=true;inspecting=true;document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=false;document.querySelector('#stagehint').textContent=selected.id+' · '+selected.deck.toUpperCase()+' BERTH INTERIOR · DRAG TO ORBIT';moveCamera(pos,target,1050);}
 function returnToBus(){inspecting=false;controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;document.querySelector('#stagehint').textContent=currentDeck==='both'?'BOTH DECKS · Interactive 3D reconstruction':currentDeck.toUpperCase()+' DECK · Interactive 3D reconstruction';moveCamera(initialCamera.position,initialCamera.target,850);}
 function resetCamera(){if(inspecting){returnToBus();return;}moveCamera(initialCamera.position,initialCamera.target,650);}
 function openBooking(){window.open('https://www.jaisaibabatravels.com/','_blank','noopener');}
@@ -150,6 +170,6 @@ function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.sty
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
 function animate(){requestAnimationFrame(animate);if(!cameraAnimating)controls.update();renderer.render(scene,camera);}animate();
-window.switchDeck=switchDeck;window.setView=setView;window.resetCamera=resetCamera;window.openBooking=openBooking;window.inspectSelected=inspectSelected;window.returnToBus=returnToBus;
+window.switchDeck=switchDeck;window.setView=setView;window.setBusMode=setBusMode;window.resetCamera=resetCamera;window.openBooking=openBooking;window.inspectSelected=inspectSelected;window.returnToBus=returnToBus;
 </script>
 </body></html>
