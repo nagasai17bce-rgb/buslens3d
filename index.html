@@ -42,16 +42,16 @@ const stage=document.querySelector('#stage');
 let renderer;
 try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}
 catch(error){document.querySelector('#stagehint').textContent='3D could not start. Check WebGL support and internet access, then reload.';console.error(error);throw error;}
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene();scene.background=new THREE.Color('#101b2a');
-const camera=new THREE.PerspectiveCamera(38,1,.1,100);camera.position.set(11,9,13);
-const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.target.set(0,2,0);controls.maxPolarAngle=Math.PI*.49;controls.minDistance=6;controls.maxDistance=25;
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);camera.position.set(10,8,13);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.07;controls.target.set(0,2.5,0);controls.maxPolarAngle=Math.PI*.49;controls.minDistance=4;controls.maxDistance=24;controls.enablePan=true;controls.screenSpacePanning=true;
 scene.add(new THREE.HemisphereLight(0xd9e8ff,0x263044,2));
-const key=new THREE.DirectionalLight(0xffe3bd,2.5);key.position.set(7,12,8);scene.add(key);
-const fill=new THREE.DirectionalLight(0x75a9ff,1.2);fill.position.set(-8,5,-7);scene.add(fill);
+const key=new THREE.DirectionalLight(0xffe3bd,3.2);key.position.set(5,12,7);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-10;key.shadow.camera.right=10;key.shadow.camera.top=12;key.shadow.camera.bottom=-12;scene.add(key);
+const fill=new THREE.DirectionalLight(0x75a9ff,1.5);fill.position.set(-8,6,-7);scene.add(fill);
 const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
-const root=new THREE.Group();scene.add(root);let berthMeshes=[];let currentDeck='lower';let selected={deck:'lower',id:'M1'};
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup;let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(10,8,13),target:new THREE.Vector3(0,2.45,0)};
 const data={
  lower:[
   {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
@@ -65,64 +65,80 @@ const data={
  ]
 };
 function box(parent,w,h,d,x,y,z,material,cast=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;parent.add(m);return m;}
+function roundedBox(parent,w,h,d,x,y,z,material,radius=.08){
+ const r=Math.min(radius,w/2,h/2);const shape=new THREE.Shape();
+ shape.moveTo(-w/2+r,-h/2);shape.lineTo(w/2-r,-h/2);shape.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);shape.lineTo(w/2,h/2-r);shape.quadraticCurveTo(w/2,h/2,w/2-r,h/2);shape.lineTo(-w/2+r,h/2);shape.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);shape.lineTo(-w/2,-h/2+r);shape.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
+ const geo=new THREE.ExtrudeGeometry(shape,{depth:d-2*r,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:r,bevelThickness:r});geo.translate(x,y,z-d/2+r);
+ const mesh=new THREE.Mesh(geo,material);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
 function makeBerth(deck,s){
- const group=new THREE.Group();const y=deck==='lower'?.82:3.25;const width=s.long?1.05:.9;const length=s.long?1.95:.9;
- const color=s.status==='available'?'#173c67':s.status==='female'?'#51234e':s.status==='booked'?'#485365':'#34445b';
- const edge=s.status==='available'?'#4b91ff':s.status==='female'?'#df65d7':s.status==='booked'?'#6b7484':'#dce6f6';
- const frame=mat(color,.45,.15),edgeMat=mat(edge,.35,.25);
- box(group,width,.18,length,s.x,y,s.z,frame);box(group,width+.05,.07,length+.05,s.x,y+.11,s.z,edgeMat);
- box(group,.12,.48,length,s.x-width/2,y+.28,s.z,frame);box(group,.12,.48,length,s.x+width/2,y+.28,s.z,frame);
- box(group,width-.16,.12,length-.18,s.x,y+.16,s.z+.02,pillowMat);
- box(group,width-.2,.09,.27,s.x,y+.25,s.z-length/2+.21,pillowMat);
- const hit=box(group,width,.12,length,s.x,y+.24,s.z,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),false);
- hit.userData={deck,seat:s};berthMeshes.push(hit);root.add(group);
+ const group=new THREE.Group(),y=deck==='lower'?.78:3.18,width=.82,length=1.55;
+ const baseColor=s.status==='available'?'#244f7c':s.status==='female'?'#653b68':'#596474';
+ const frame=mat('#29384b',.55,.18),mattress=mat(baseColor,.88),pillow=mat('#e5ded2',.92),railMat=mat('#7d8998',.48,.35);
+ roundedBox(group,width,.22,length,s.x,y,s.z,frame,.09);
+ const mattressMesh=roundedBox(group,width-.09,.15,length-.12,s.x,y+.16,s.z+.015,mattress,.1);
+ roundedBox(group,width-.22,.12,.31,s.x,y+.29,s.z-length/2+.25,pillow,.09);
+ box(group,.055,.22,length,s.x-width/2+.025,y+.27,s.z,railMat);box(group,.055,.22,length,s.x+width/2-.025,y+.27,s.z,railMat);
+ box(group,width-.18,.035,.035,s.x,y+.245,s.z+length/2-.12,mat('#b99a72',.65,.12),false);
+ const halo=new THREE.Mesh(new THREE.BoxGeometry(width+.13,.035,length+.13),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.85,depthWrite:false}));halo.position.set(s.x,y+.39,s.z);halo.visible=false;group.add(halo);
+ const hit=new THREE.Mesh(new THREE.BoxGeometry(width+.16,.55,length+.16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.set(s.x,y+.27,s.z);hit.userData={deck,seat:s};group.add(hit);berthMeshes.push(hit);
+ group.userData={deck,id:s.id,halo,mattress:mattressMesh};berthGroups.push(group);root.add(group);
 }
 function build(){
- // Bus lower and upper decks are separated for inspection; cutaway shell shows a representative side profile.
- const lower= new THREE.Group();const upper=new THREE.Group();
- for(const [g,y] of [[lower,.15],[upper,2.55]]){
-  box(g,5.5,.18,7.4,0,y,0,floorMat);
-  box(g,5.5,.22,.16,0,y+1.15,-3.65,shell);
-  box(g,5.5,.22,.16,0,y+1.15,3.65,shell);
-  for(let z=-2.9;z<=2.9;z+=1.15){box(g,.08,.85,.8,-2.72,y+.62,z,glassMat,false);box(g,.08,.85,.8,2.72,y+.62,z,glassMat,false);}
-  box(g,.15,1.1,7.4,-2.78,y+.6,0,shell);box(g,.15,1.1,7.4,2.78,y+.6,0,shell);
-  box(g,5.5,.08,.08,0,y+1.28,0,trim,false);
+ lowerDeckGroup=new THREE.Group();upperDeckGroup=new THREE.Group();
+ function makeDeck(g,y){
+  box(g,4.35,.18,11.8,0,y,0,floorMat);
+  box(g,4.35,.16,.14,0,y+1.85,-5.9,shell);box(g,4.35,.16,.14,0,y+1.85,5.9,shell);
+  for(let z=-5;z<=5;z+=1.95){
+   const win=new THREE.Mesh(new THREE.BoxGeometry(.045,1.05,1.55),glassMat);win.position.set(-2.12,y+1.15,z);g.add(win);
+   const win2=win.clone();win2.position.x=2.12;g.add(win2);
+  }
+  box(g,.12,.72,11.8,-2.16,y+.48,0,shell);box(g,.12,.72,11.8,2.16,y+.48,0,shell);
+  box(g,4.35,.07,.08,0,y+1.94,0,trim,false);
+  box(g,.72,.025,11.2,.28,y+.105,0,mat('#b4a18a'),false);
+  for(const z of [-4.9,-3,-1.1,.8,2.7,4.6]){const lamp=new THREE.Mesh(new THREE.BoxGeometry(.42,.025,.035),new THREE.MeshBasicMaterial({color:'#f5d7a2'}));lamp.position.set(.28,y+.14,z);g.add(lamp);}
  }
- root.add(lower);root.add(upper);
- box(root,5.8,.18,.25,0,1.42,-3.8,shell);box(root,5.8,.18,.25,0,3.82,-3.8,shell);
- for(const d of ['lower','upper']) for(const s of data[d]) makeBerth(d,s);
- // Exterior wheels and front cab marker (front is negative Z).
- for(const z of [-2.5,2.5]) for(const x of [-2.9,2.9]){
-  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,32),mat('#171c25',.9));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.5,z);root.add(wheel);
+ makeDeck(lowerDeckGroup,.12);makeDeck(upperDeckGroup,2.52);root.add(lowerDeckGroup);root.add(upperDeckGroup);
+ const laneX={L:-1.48,M:-.55,R:1.28,UL:-1.48,UM:-.55,UR:1.28};
+ for(const d of ['lower','upper'])for(const s of data[d]){
+  const prefix=s.id.startsWith('UL')?'UL':s.id.startsWith('UM')?'UM':s.id.startsWith('UR')?'UR':s.id[0];
+  s.x=laneX[prefix];const n=parseInt(s.id.replace(/^[A-Z]+/,''),10);s.z=-4.55+(n-1)*1.82;s.long=true;makeBerth(d,s);
  }
- const cab=box(root,2.5,1.25,.9,0,.85,-4.1,glassMat);cab.material=glassMat;
+ box(root,4.55,.22,12,0,-.08,0,mat('#202a38'));
+ for(const z of [-4.15,4.15])for(const x of [-2.25,2.25]){
+  const tire=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,32),mat('#151b24',.95));tire.rotation.z=Math.PI/2;tire.position.set(x,.35,z);tire.castShadow=true;root.add(tire);
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.235,24),mat('#aab3bf',.35,.65));hub.rotation.z=Math.PI/2;hub.position.set(x,.35,z);root.add(hub);
+ }
+ box(root,2.1,1.25,.65,0,.88,-6.1,glassMat);box(root,1.5,.35,.55,0,.52,-5.72,mat('#263444'));
 }
-build();
+build();controls.target.copy(initialCamera.target);controls.update();controls.saveState();
 function setSelected(deck,id){
  const s=data[deck].find(v=>v.id===id);if(!s)return;
  if(s.status==='booked'){toast('This berth is marked unavailable in the supplied seat map.');return;}
- selected={deck,id};document.querySelector('#seatdeck').textContent=deck==='lower'?'Lower deck':'Upper deck';
+ selected={deck,id};
+ berthGroups.forEach(g=>{const active=g.userData.deck===deck&&g.userData.id===id;g.userData.halo.visible=active;g.userData.mattress.material.emissive.set(active?'#315f9d':'#000000');g.userData.mattress.material.emissiveIntensity=active?.65:0;});
+ document.querySelector('#seatdeck').textContent=deck==='lower'?'Lower deck':'Upper deck';
  document.querySelector('#seatname').textContent=id;document.querySelector('#seatprice').textContent='₹'+s.price;
  document.querySelector('#seatstatus').textContent=s.status==='female'?'Women-only · screenshot-derived':'Available · screenshot-derived';
  document.querySelectorAll('.mapseat').forEach(el=>el.classList.toggle('selected',el.dataset.deck===deck&&el.dataset.id===id));
 }
-function switchDeck(d){
+function switchDeck(d,preserveSelection=false){
  currentDeck=d;document.querySelector('#stagehint').textContent=d==='both'?'BOTH DECKS · Interactive 3D reconstruction':d.toUpperCase()+' DECK · Interactive 3D reconstruction';
  document.querySelector('#lowerbtn').classList.toggle('active',d==='lower');document.querySelector('#upperbtn').classList.toggle('active',d==='upper');
- root.children.forEach((child,i)=>{if(i===0)child.visible=d!=='upper';else if(i===1)child.visible=d!=='lower';});
- berthMeshes.forEach(m=>{m.visible=d==='both'||m.userData.deck===d;});
- if(d!=='both'){const match=data[d].find(s=>s.status==='available'||s.status==='female');if(match)setSelected(d,match.id);}
+ lowerDeckGroup.visible=d!=='upper';upperDeckGroup.visible=d!=='lower';
+ berthGroups.forEach(g=>{g.visible=d==='both'||g.userData.deck===d;});
+ if(!preserveSelection&&d!=='both'){const match=data[d].find(s=>s.status==='available'||s.status==='female');if(match)setSelected(d,match.id);}
 }
 function setView(v){const is3d=v==='3d';document.querySelector('#stage').style.display=is3d?'block':'none';document.querySelector('#seatmap').style.display=is3d?'none':'block';document.querySelector('#view3d').classList.toggle('active',is3d);document.querySelector('#viewmap').classList.toggle('active',!is3d);}
-function resetCamera(){camera.position.set(11,9,13);controls.target.set(0,2,0);controls.update();}
+function resetCamera(){controls.reset();camera.position.copy(initialCamera.position);controls.target.copy(initialCamera.target);controls.update();}
 function openBooking(){window.open('https://www.makemytrip.com/bus-tickets/search?from=Chennai&fromCode=MMTCC1159&to=Bengaluru&toCode=MMTCC1092&departureDate=20-11-2026&source=LANDING&showCrossSell=true&itineraryId=6ff30e45-d979-4b0e-b568-5d937ade212a','_blank');}
-function mapSeat(deck,s){if(!s)return Object.assign(document.createElement('div'),{className:'empty'});const el=document.createElement('button');el.className='mapseat '+(s.long?'long ':'')+s.status;el.dataset.deck=deck;el.dataset.id=s.id;el.innerHTML='<b>'+s.id+'</b><small>₹'+s.price+'</small>';el.onclick=()=>{if(s.status!=='booked'){setSelected(deck,s.id);switchDeck(deck);setView('3d');}};return el;}
+function mapSeat(deck,s){if(!s)return Object.assign(document.createElement('div'),{className:'empty'});const el=document.createElement('button');el.className='mapseat '+(s.long?'long ':'')+s.status;el.dataset.deck=deck;el.dataset.id=s.id;el.innerHTML='<b>'+s.id+'</b><small>₹'+s.price+'</small>';el.onclick=()=>{if(s.status!=='booked'){switchDeck(deck,true);setSelected(deck,s.id);setView('3d');}};return el;}
 for(const d of ['lower','upper']){const grid=document.querySelector('#'+d+'grid');const entries=data[d];const mids=entries.filter(s=>s.x===-.15);const rights=entries.filter(s=>s.x===1.42);for(let row=0;row<6;row++){const long=entries.find(s=>s.long&&s.id===(d==='lower'?'L':'UL')+(row+1));grid.append(mapSeat(d,long));grid.append(mapSeat(d,mids[row]));grid.append(mapSeat(d,rights[row]));}}
 setSelected('lower','M1');
 const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
-renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.visible),false);if(hits.length){const u=hits[0].object.userData;setSelected(u.deck,u.seat.id);}});
+renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.parent&&m.parent.visible),true);if(hits.length){const u=hits[0].object.userData;if(u&&u.seat){switchDeck(u.deck,true);setSelected(u.deck,u.seat.id);}}});
 function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}animate();
 window.switchDeck=switchDeck;window.setView=setView;window.resetCamera=resetCamera;window.openBooking=openBooking;
