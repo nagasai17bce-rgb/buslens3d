@@ -130,9 +130,10 @@ function switchDeck(d,preserveSelection=false){
  if(!preserveSelection&&d!=='both'){const match=data[d].find(s=>s.status==='available'||s.status==='female');if(match)setSelected(d,match.id);}
 }
 function setView(v){const is3d=v==='3d';document.querySelector('#stage').style.display=is3d?'block':'none';document.querySelector('#seatmap').style.display=is3d?'none':'block';document.querySelector('#view3d').classList.toggle('active',is3d);document.querySelector('#viewmap').classList.toggle('active',!is3d);}
+let cameraAnimating=false;
 function moveCamera(position,target,duration=900){
- const token=++cameraMotion;const fromPos=camera.position.clone(),fromTarget=controls.target.clone();const start=performance.now();controls.enabled=false;
- function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,position,ease);controls.target.lerpVectors(fromTarget,target,ease);camera.lookAt(controls.target);if(t<1)requestAnimationFrame(step);else{controls.enabled=true;controls.update();}}
+ const token=++cameraMotion;const fromPos=camera.position.clone(),fromTarget=controls.target.clone();const start=performance.now();cameraAnimating=true;controls.enabled=false;
+ function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,position,ease);controls.target.lerpVectors(fromTarget,target,ease);camera.lookAt(controls.target);if(t<1)requestAnimationFrame(step);else{cameraAnimating=false;controls.enabled=true;controls.update();}}
  requestAnimationFrame(step);
 }
 function inspectSelected(){const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;setView('3d');switchDeck(selected.deck,true);const g=berthGroups.find(v=>v.userData.deck===selected.deck&&v.userData.id===selected.id);if(!g)return;const y=selected.deck==='lower'?.78:3.18;const target=new THREE.Vector3(s.x,y+.22,s.z);const pos=new THREE.Vector3(s.x+2.25,y+1.15,s.z+2.05);inspecting=true;document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=false;document.querySelector('#stagehint').textContent=selected.id+' · BERTH INTERIOR INSPECTION';moveCamera(pos,target,1050);}
@@ -147,7 +148,7 @@ renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.get
 function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}animate();
+function animate(){requestAnimationFrame(animate);if(!cameraAnimating)controls.update();renderer.render(scene,camera);}animate();
 window.switchDeck=switchDeck;window.setView=setView;window.resetCamera=resetCamera;window.openBooking=openBooking;window.inspectSelected=inspectSelected;window.returnToBus=returnToBus;
 </script>
 </body></html>
