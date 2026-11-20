@@ -1,1 +1,130 @@
-<!-- BusLens 3D prototype: source will be committed as the full HTML application. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BusLens 3D — Chennai to Bengaluru</title>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
+</script>
+<style>
+:root{color-scheme:dark;--bg:#080d17;--panel:#101827;--line:#26354c;--muted:#91a0b8;--text:#f4f7fb;--blue:#4b91ff;--pink:#df65d7;--green:#31c48d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#1b2b48 0,#080d17 55%);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:12px 22px;background:#0b111de8;position:sticky;top:0;z-index:5}.brand{font-size:19px;font-weight:800}.brand b{background:#e8494b;border-radius:9px;padding:7px 9px;margin-right:8px}.route{color:#dce5f5}.spacer{flex:1}.btn,.tab,.deckbtn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#18243a;color:white;cursor:pointer}.btn.primary{border:0;background:linear-gradient(120deg,#3478f6,#7857e9);font-weight:700}.layout{display:grid;grid-template-columns:245px minmax(420px,1fr) 245px;gap:14px;padding:16px;max-width:1600px;margin:auto}.card{background:linear-gradient(160deg,#121c2b,#0e1725);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}.operator{font-weight:800;font-size:16px}.sub,.muted{color:var(--muted)}.line{height:1px;background:var(--line);margin:13px 0}.kv,.legend{display:flex;justify-content:space-between;margin:10px 0;color:#cbd6e8}.section-title{font-weight:750;margin-bottom:12px}.insight{margin:10px 0;color:#cbd6e8}.stage{height:620px;position:relative;overflow:hidden;border:1px solid #263750;border-radius:17px;background:radial-gradient(ellipse at 50% 40%,#263954 0,#101b2c 50%,#0b1320 100%)}#scene{width:100%;height:100%;display:block}.stagehint{position:absolute;top:14px;left:14px;background:#101a2bd9;border:1px solid #33445f;border-radius:9px;padding:8px 11px;color:#d5e2f5;pointer-events:none}.stagefoot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;color:#91a0b8;font-size:12px;pointer-events:none}.toolbar,.deckswitch{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.tab.active,.deckbtn.active{background:#dce6ff;color:#101a2b;font-weight:800}.seatmap{display:none;background:#0c1421;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}.mapdecks{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:520px}.deckmap{background:#101b2a;border:1px solid #31415a;border-radius:13px;padding:12px}.deckmap h3{text-align:center;margin:2px 0 14px}.mapgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.mapseat{min-height:55px;border-radius:8px;background:#263247;border:1px solid #526079;color:#e0e8f6;display:grid;place-items:center;cursor:pointer;font-size:11px}.mapseat.long{min-height:92px}.mapseat.available{border:2px solid var(--blue);background:#152b49}.mapseat.female{border:2px solid var(--pink);background:#39203d}.mapseat.selected{outline:3px solid white}.mapseat.booked{opacity:.4;cursor:not-allowed}.empty{visibility:hidden}.price{font-size:26px;font-weight:850}.swatch{width:15px;height:15px;border-radius:4px;border:2px solid var(--blue);display:inline-block;margin-right:8px}.swatch.pink{border-color:var(--pink)}.swatch.grey{border-color:#657086}.footnote{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#16243a;border:1px solid #425777;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+@media(max-width:1050px){.layout{grid-template-columns:220px minmax(320px,1fr)}.rightcol{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rightcol .card{margin:0}}
+@media(max-width:720px){header{flex-wrap:wrap}.layout{display:flex;flex-direction:column;padding:9px}.stage{height:470px}.leftcol,.rightcol{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{margin:0}.toolbar{flex-wrap:wrap}.route{display:none}}
+</style>
+</head>
+<body>
+<header><div class="brand"><b>BL</b>BusLens 3D</div><div class="route"><strong>Chennai</strong> → <strong>Bengaluru</strong> · 20 Nov 2026 · Jai Sai Baba Travels</div><div class="spacer"></div><button class="btn primary" onclick="openBooking()">Open MakeMyTrip ↗</button></header>
+<div class="layout">
+<aside class="leftcol">
+ <section class="card"><div class="operator">Jai Sai Baba Travels</div><div class="sub">AC Sleeper · 2+1 configuration</div><div class="line"></div><div class="kv"><span>Departure</span><b>11:00 PM</b></div><div class="kv"><span>Seat map</span><b>Screenshot reference</b></div><div class="line"></div><div class="section-title">Amenities</div><div class="insight">❄️ Air conditioning</div><div class="insight">⚡ Charging point</div><div class="insight">💡 Reading light</div><div class="insight">🛏️ Sleeper berth</div><div class="footnote">Amenities are illustrative until verified against the individual listing.</div></section>
+ <section class="card"><div class="section-title">Seat insights</div><div class="insight">✓ Compare upper and lower berths</div><div class="insight">✓ Inspect window-side positions</div><div class="insight">✓ See price and availability per berth</div><div class="insight">✓ Rotate the reconstructed cabin</div></section>
+</aside>
+<main class="center">
+ <div class="toolbar"><button class="tab active" id="view3d" onclick="setView('3d')">3D view</button><button class="tab" id="viewmap" onclick="setView('map')">Seat map</button><button class="tab" onclick="resetCamera()">Reset view</button></div>
+ <div class="stage" id="stage"><canvas id="scene"></canvas><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span>Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
+ <div class="seatmap" id="seatmap"><div class="mapdecks"><div class="deckmap"><h3>LOWER BERTH</h3><div class="mapgrid" id="lowergrid"></div></div><div class="deckmap"><h3>UPPER BERTH</h3><div class="mapgrid" id="uppergrid"></div></div></div><div class="footnote">Approximate arrangement transcribed from the supplied MakeMyTrip seat-map screenshot. Grey = unavailable; blue = available; pink = women-only; neutral = uncertain.</div></div>
+ <div class="deckswitch"><button class="deckbtn active" id="lowerbtn" onclick="switchDeck('lower')">Lower deck</button><button class="deckbtn" id="upperbtn" onclick="switchDeck('upper')">Upper deck</button><button class="deckbtn" onclick="switchDeck('both')">Both decks</button></div>
+</main>
+<aside class="rightcol">
+ <section class="card"><div class="section-title">Selected berth</div><div class="sub" id="seatdeck">Lower deck</div><div id="seatname" style="font-size:19px;font-weight:800;margin:5px 0">M1</div><div class="price" id="seatprice">₹670</div><div class="line"></div><div class="sub" id="seatstatus">Available · screenshot-derived</div><button class="btn primary" style="width:100%;margin-top:13px" onclick="openBooking()">Continue on MakeMyTrip ↗</button></section>
+ <section class="card"><div class="section-title">Availability legend</div><div class="legend"><span><i class="swatch"></i>Available</span></div><div class="legend"><span><i class="swatch pink"></i>Women-only</span></div><div class="legend"><span><i class="swatch grey"></i>Unavailable / booked</span></div></section>
+ <section class="card"><div class="section-title">Data confidence</div><b style="color:#31c48d">Seat map reference</b><div class="sub" style="margin-top:8px">Source: uploaded screenshot</div><div class="footnote">Prices/status are manually transcribed sample values, not live inventory. Bus geometry and physical features are illustrative.</div></section>
+</aside>
+</div><div class="toast" id="toast"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const canvas=document.querySelector('#scene');
+const stage=document.querySelector('#stage');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}
+catch(error){document.querySelector('#stagehint').textContent='3D could not start. Check WebGL support and internet access, then reload.';console.error(error);throw error;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();scene.background=new THREE.Color('#101b2a');
+const camera=new THREE.PerspectiveCamera(38,1,.1,100);camera.position.set(11,9,13);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.target.set(0,2,0);controls.maxPolarAngle=Math.PI*.49;controls.minDistance=6;controls.maxDistance=25;
+scene.add(new THREE.HemisphereLight(0xd9e8ff,0x263044,2));
+const key=new THREE.DirectionalLight(0xffe3bd,2.5);key.position.set(7,12,8);scene.add(key);
+const fill=new THREE.DirectionalLight(0x75a9ff,1.2);fill.position.set(-8,5,-7);scene.add(fill);
+const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let currentDeck='lower';let selected={deck:'lower',id:'M1'};
+const data={
+ lower:[
+  {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
+  {id:'M1',x:-.15,z:-2.65,price:670,status:'available'},{id:'M2',x:-.15,z:-1.72,price:777,status:'booked'},{id:'M3',x:-.15,z:-.78,price:599,status:'female'},{id:'M4',x:-.15,z:.16,price:599,status:'female'},{id:'M5',x:-.15,z:1.1,price:777,status:'booked'},{id:'M6',x:-.15,z:2.05,price:777,status:'booked'},
+  {id:'R1',x:1.42,z:-2.65,price:744,status:'booked'},{id:'R2',x:1.42,z:-1.72,price:699,status:'available'},{id:'R3',x:1.42,z:-.78,price:777,status:'booked'},{id:'R4',x:1.42,z:.16,price:777,status:'booked'},{id:'R5',x:1.42,z:1.1,price:699,status:'available'},{id:'R6',x:1.42,z:2.05,price:777,status:'booked'}
+ ],
+ upper:[
+  {id:'UL1',x:-2.25,z:-2.6,long:true,price:1666,status:'booked'},{id:'UL2',x:-2.25,z:-1.55,long:true,price:1777,status:'booked'},{id:'UL3',x:-2.25,z:-.5,long:true,price:1999,status:'booked'},{id:'UL4',x:-2.25,z:.55,long:true,price:1776,status:'booked'},{id:'UL5',x:-2.25,z:1.6,long:true,price:1776,status:'booked'},{id:'UL6',x:-2.25,z:2.65,long:true,price:1386,status:'booked'},
+  {id:'UM1',x:-.15,z:-2.65,price:1384,status:'booked'},{id:'UM2',x:-.15,z:-1.72,price:1384,status:'booked'},{id:'UM3',x:-.15,z:-.78,price:1384,status:'booked'},{id:'UM4',x:-.15,z:.16,price:1384,status:'booked'},{id:'UM5',x:-.15,z:1.1,price:1384,status:'booked'},{id:'UM6',x:-.15,z:2.05,price:1384,status:'booked'},
+  {id:'UR1',x:1.42,z:-2.65,price:1055,status:'available'},{id:'UR2',x:1.42,z:-1.72,price:1384,status:'booked'},{id:'UR3',x:1.42,z:-.78,price:1384,status:'booked'},{id:'UR4',x:1.42,z:.16,price:1331,status:'booked'},{id:'UR5',x:1.42,z:1.1,price:1384,status:'booked'},{id:'UR6',x:1.42,z:2.05,price:1331,status:'booked'}
+ ]
+};
+function box(parent,w,h,d,x,y,z,material,cast=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;parent.add(m);return m;}
+function makeBerth(deck,s){
+ const group=new THREE.Group();const y=deck==='lower'?.82:3.25;const width=s.long?1.05:.9;const length=s.long?1.95:.9;
+ const color=s.status==='available'?'#173c67':s.status==='female'?'#51234e':s.status==='booked'?'#485365':'#34445b';
+ const edge=s.status==='available'?'#4b91ff':s.status==='female'?'#df65d7':s.status==='booked'?'#6b7484':'#dce6f6';
+ const frame=mat(color,.45,.15),edgeMat=mat(edge,.35,.25);
+ box(group,width,.18,length,s.x,y,s.z,frame);box(group,width+.05,.07,length+.05,s.x,y+.11,s.z,edgeMat);
+ box(group,.12,.48,length,s.x-width/2,y+.28,s.z,frame);box(group,.12,.48,length,s.x+width/2,y+.28,s.z,frame);
+ box(group,width-.16,.12,length-.18,s.x,y+.16,s.z+.02,pillowMat);
+ box(group,width-.2,.09,.27,s.x,y+.25,s.z-length/2+.21,pillowMat);
+ const hit=box(group,width,.12,length,s.x,y+.24,s.z,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),false);
+ hit.userData={deck,seat:s};berthMeshes.push(hit);root.add(group);
+}
+function build(){
+ // Bus lower and upper decks are separated for inspection; cutaway shell shows a representative side profile.
+ const lower= new THREE.Group();const upper=new THREE.Group();
+ for(const [g,y] of [[lower,.15],[upper,2.55]]){
+  box(g,5.5,.18,7.4,0,y,0,floorMat);
+  box(g,5.5,.22,.16,0,y+1.15,-3.65,shell);
+  box(g,5.5,.22,.16,0,y+1.15,3.65,shell);
+  for(let z=-2.9;z<=2.9;z+=1.15){box(g,.08,.85,.8,-2.72,y+.62,z,glassMat,false);box(g,.08,.85,.8,2.72,y+.62,z,glassMat,false);}
+  box(g,.15,1.1,7.4,-2.78,y+.6,0,shell);box(g,.15,1.1,7.4,2.78,y+.6,0,shell);
+  box(g,5.5,.08,.08,0,y+1.28,0,trim,false);
+ }
+ root.add(lower);root.add(upper);
+ box(root,5.8,.18,.25,0,1.42,-3.8,shell);box(root,5.8,.18,.25,0,3.82,-3.8,shell);
+ for(const d of ['lower','upper']) for(const s of data[d]) makeBerth(d,s);
+ // Exterior wheels and front cab marker (front is negative Z).
+ for(const z of [-2.5,2.5]) for(const x of [-2.9,2.9]){
+  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,32),mat('#171c25',.9));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.5,z);root.add(wheel);
+ }
+ const cab=box(root,2.5,1.25,.9,0,.85,-4.1,glassMat);cab.material=glassMat;
+}
+build();
+function setSelected(deck,id){
+ const s=data[deck].find(v=>v.id===id);if(!s)return;
+ if(s.status==='booked'){toast('This berth is marked unavailable in the supplied seat map.');return;}
+ selected={deck,id};document.querySelector('#seatdeck').textContent=deck==='lower'?'Lower deck':'Upper deck';
+ document.querySelector('#seatname').textContent=id;document.querySelector('#seatprice').textContent='₹'+s.price;
+ document.querySelector('#seatstatus').textContent=s.status==='female'?'Women-only · screenshot-derived':'Available · screenshot-derived';
+ document.querySelectorAll('.mapseat').forEach(el=>el.classList.toggle('selected',el.dataset.deck===deck&&el.dataset.id===id));
+}
+function switchDeck(d){
+ currentDeck=d;document.querySelector('#stagehint').textContent=d==='both'?'BOTH DECKS · Interactive 3D reconstruction':d.toUpperCase()+' DECK · Interactive 3D reconstruction';
+ document.querySelector('#lowerbtn').classList.toggle('active',d==='lower');document.querySelector('#upperbtn').classList.toggle('active',d==='upper');
+ root.children.forEach((child,i)=>{if(i===0)child.visible=d!=='upper';else if(i===1)child.visible=d!=='lower';});
+ berthMeshes.forEach(m=>{m.visible=d==='both'||m.userData.deck===d;});
+ if(d!=='both'){const match=data[d].find(s=>s.status==='available'||s.status==='female');if(match)setSelected(d,match.id);}
+}
+function setView(v){const is3d=v==='3d';document.querySelector('#stage').style.display=is3d?'block':'none';document.querySelector('#seatmap').style.display=is3d?'none':'block';document.querySelector('#view3d').classList.toggle('active',is3d);document.querySelector('#viewmap').classList.toggle('active',!is3d);}
+function resetCamera(){camera.position.set(11,9,13);controls.target.set(0,2,0);controls.update();}
+function openBooking(){window.open('https://www.makemytrip.com/bus-tickets/search?from=Chennai&fromCode=MMTCC1159&to=Bengaluru&toCode=MMTCC1092&departureDate=20-11-2026&source=LANDING&showCrossSell=true&itineraryId=6ff30e45-d979-4b0e-b568-5d937ade212a','_blank');}
+function mapSeat(deck,s){const el=document.createElement('button');el.className='mapseat '+(s.long?'long ':'')+s.status;el.dataset.deck=deck;el.dataset.id=s.id;el.innerHTML='<b>'+s.id+'</b><small>₹'+s.price+'</small>';el.onclick=()=>{if(s.status!=='booked'){setSelected(deck,s.id);switchDeck(deck);setView('3d');}};return el;}
+for(const d of ['lower','upper']){const grid=document.querySelector('#'+d+'grid');const entries=data[d];for(let row=0;row<6;row++){const long=entries.find(s=>s.long&&s.id===(d==='lower'?'L':'UL')+(row+1));grid.append(mapSeat(d,long));const mids=entries.filter(s=>s.x===-.15);const rights=entries.filter(s=>s.x===1.42);grid.append(mapSeat(d,mids[row*2]));grid.append(mapSeat(d,rights[row*2]));grid.append(Object.assign(document.createElement('div'),{className:'empty'}));grid.append(mids[row*2+1]?mapSeat(d,mids[row*2+1]):Object.assign(document.createElement('div'),{className:'empty'}));grid.append(rights[row*2+1]?mapSeat(d,rights[row*2+1]):Object.assign(document.createElement('div'),{className:'empty'}));}}
+setSelected('lower','M1');
+const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
+renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.visible),false);if(hits.length){const u=hits[0].object.userData;setSelected(u.deck,u.seat.id);}});
+function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stage);resize();
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}animate();
+window.switchDeck=switchDeck;window.setView=setView;window.resetCamera=resetCamera;window.openBooking=openBooking;
+</script>
+</body></html>
