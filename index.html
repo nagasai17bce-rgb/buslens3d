@@ -182,8 +182,8 @@ function inspectSelected(){
  const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;
  setView('3d');setBusMode('interior');switchDeck(selected.deck,true);
  inspecting=true;firstPerson=true;controls.enabled=false;
- const floorY=selected.deck==='lower'?.12:2.52;
- const destination=new THREE.Vector3(THREE.MathUtils.clamp(s.x,-1.68,1.68),floorY+.66,THREE.MathUtils.clamp(s.z+.12,-5.15,5.15));
+ const berthBaseY=selected.deck==='lower'?.78:3.18;
+ const destination=new THREE.Vector3(THREE.MathUtils.clamp(s.x,-1.68,1.68),berthBaseY+.48,THREE.MathUtils.clamp(s.z+.12,-5.15,5.15));
  lookYaw=0;lookPitch=0;
  const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone();
  const targetQuat=new THREE.Quaternion();
