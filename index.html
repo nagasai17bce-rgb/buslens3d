@@ -242,23 +242,41 @@ function inspectSelected(){
  const targetQuat=new THREE.Quaternion();
  const start=performance.now(),duration=1150,token=++cameraMotion;cameraAnimating=true;
  document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=true;document.querySelector('#seatExit').classList.add('visible');
- document.querySelector('#stagehint').textContent=selected.id+' · FIRST-PERSON BERTH VIEW · SCROLL TO LOOK 360°';
+ document.querySelector('#stagehint').textContent=selected.id+' · 360° SEAT VIEW · DRAG TO LOOK AROUND';
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,destination,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{camera.position.copy(destination);camera.quaternion.copy(targetQuat);cameraAnimating=false;}}
  requestAnimationFrame(step);
 }
 function updateFirstPersonLook(){
- // Keep the camera level: scrolling only changes the horizontal heading.
- camera.quaternion.setFromEuler(new THREE.Euler(0,lookYaw,0,'YXZ'));
+ // Yaw is unrestricted for a complete 360° turn; pitch is deliberately limited.
+ camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
 }
-// A normalized, capped scroll input makes the 360° sweep predictable across
-// mouse wheels and trackpads. Vertical scroll rotates; horizontal gestures are ignored.
+// Seat-view interaction: click/touch and drag to look around from the selected berth.
+canvas.addEventListener('pointerdown',e=>{
+ if(!firstPerson||cameraAnimating)return;
+ dragLook=true;lastPointer={x:e.clientX,y:e.clientY};
+ canvas.setPointerCapture?.(e.pointerId);
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!firstPerson||!dragLook)return;
+ const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;
+ lastPointer={x:e.clientX,y:e.clientY};
+ lookYaw-=dx*.006;
+ lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.004,-.62,.62);
+ updateFirstPersonLook();
+});
+function stopSeatLook(e){
+ if(!dragLook)return;
+ dragLook=false;
+ if(e.pointerId!==undefined&&canvas.hasPointerCapture?.(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+}
+canvas.addEventListener('pointerup',stopSeatLook);
+canvas.addEventListener('pointercancel',stopSeatLook);
 canvas.addEventListener('wheel',e=>{
  if(!firstPerson)return;
  e.preventDefault();
  const unit=e.deltaMode===1?16:(e.deltaMode===2?window.innerHeight:1);
  const delta=THREE.MathUtils.clamp(e.deltaY*unit,-120,120);
- lookYaw-=delta*.0025;
- lookPitch=0;
+ lookYaw-=delta*.003;
  updateFirstPersonLook();
 },{passive:false});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
