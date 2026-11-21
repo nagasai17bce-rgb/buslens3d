@@ -251,17 +251,16 @@ function updateFirstPersonLook(){
  if(firstPersonAnchor)camera.position.copy(firstPersonAnchor);
  camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
 }
-// Scroll capture at window level so browser/page scrolling cannot swallow the
-// gesture. Rotation is anchored to the currently selected berth.
-window.addEventListener('wheel',e=>{
+// In the selected-berth view, wheel / trackpad scrolling rotates the view
+// around the berth just as dragging rotates the overview. Bind directly to the
+// 3D stage so the gesture is reliable and does not depend on pointer coordinates.
+stage.addEventListener('wheel',e=>{
  if(!firstPerson||cameraAnimating)return;
- const r=stage.getBoundingClientRect();
- if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
  e.preventDefault();
- const scale=e.deltaMode===1?16:(e.deltaMode===2?window.innerHeight:1);
- lookYaw-=e.deltaY*scale*.006;
+ const delta=e.deltaMode===1?e.deltaY*16:(e.deltaMode===2?e.deltaY*stage.clientHeight:e.deltaY);
+ lookYaw-=delta*.008;
  updateFirstPersonLook();
-},{capture:true,passive:false});
+},{passive:false});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
 
 function returnToBus(){
