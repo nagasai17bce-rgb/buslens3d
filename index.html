@@ -51,7 +51,7 @@ const key=new THREE.DirectionalLight(0xffe3bd,3.2);key.position.set(5,12,7);key.
 const fill=new THREE.DirectionalLight(0x75a9ff,1.5);fill.position.set(-8,6,-7);scene.add(fill);
 const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
-const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;let firstPerson=false;let lookYaw=0;let lookPitch=0;let dragLook=false;let lastPointer={x:0,y:0};
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;let firstPerson=false;let lookYaw=0;let lookPitch=0;let firstPersonAnchor=null;
 const data={
  lower:[
   {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'available'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'available'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'available'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'available'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'available'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'available'},
@@ -234,65 +234,38 @@ function moveCamera(position,target,duration=900){
 function inspectSelected(){
  const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;
  setView('3d');setBusMode('interior');switchDeck(selected.deck,true);
- inspecting=true;firstPerson=true;stage.style.cursor='grab';controls.enabled=false;
+ inspecting=true;firstPerson=true;controls.enabled=false;
  const berthBaseY=selected.deck==='lower'?.78:3.18;
  const destination=new THREE.Vector3(THREE.MathUtils.clamp(s.x,-1.68,1.68),berthBaseY+.48,THREE.MathUtils.clamp(s.z+.12,-5.15,5.15));
- lookYaw=0;lookPitch=0;
+ lookYaw=0;lookPitch=0;firstPersonAnchor=destination.clone();
  const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone();
  const targetQuat=new THREE.Quaternion();
  const start=performance.now(),duration=1150,token=++cameraMotion;cameraAnimating=true;
  document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=true;document.querySelector('#seatExit').classList.add('visible');
- document.querySelector('#stagehint').textContent=selected.id+' · 360° SEAT VIEW · SCROLL TO ROTATE';
+ document.querySelector('#stagehint').textContent=selected.id+' · FIXED BERTH VIEW · SCROLL FOR 360°';
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,destination,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{camera.position.copy(destination);camera.quaternion.copy(targetQuat);cameraAnimating=false;}}
  requestAnimationFrame(step);
 }
 function updateFirstPersonLook(){
- // Yaw is unrestricted for a complete 360° turn; pitch is deliberately limited.
+ // The camera stays at the selected berth; only its viewing direction changes.
+ if(firstPersonAnchor)camera.position.copy(firstPersonAnchor);
  camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
 }
-// Seat-view interaction: bind to the whole stage so overlays/canvas hit-testing
-// cannot swallow the drag. The camera remains at the selected berth.
-canvas.style.touchAction='none';
-canvas.style.cursor='grab';
-stage.addEventListener('pointerdown',e=>{
- if(!firstPerson)return;
- e.preventDefault();
- dragLook=true;lastPointer={x:e.clientX,y:e.clientY};
- stage.setPointerCapture(e.pointerId);
- stage.style.cursor='grabbing';
-});
-stage.addEventListener('pointermove',e=>{
- if(!firstPerson||!dragLook)return;
- e.preventDefault();
- const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;
- lastPointer={x:e.clientX,y:e.clientY};
- lookYaw-=dx*.009;
- lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.006,-.58,.58);
- updateFirstPersonLook();
-});
-function stopSeatLook(e){
- if(!dragLook)return;
- dragLook=false;stage.style.cursor=firstPerson?'grab':'default';
- if(e.pointerId!==undefined&&stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);
-}
-stage.addEventListener('pointerup',stopSeatLook);
-stage.addEventListener('pointercancel',stopSeatLook);
-stage.addEventListener('lostpointercapture',()=>{dragLook=false;stage.style.cursor=firstPerson?'grab':'default';});
-// Scroll anywhere over the 3D stage to continuously turn the seated view.
-stage.addEventListener('wheel',e=>{
+// Scroll capture at window level so browser/page scrolling cannot swallow the
+// gesture. Rotation is anchored to the currently selected berth.
+window.addEventListener('wheel',e=>{
  if(!firstPerson||cameraAnimating)return;
+ const r=stage.getBoundingClientRect();
+ if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
  e.preventDefault();
- const unit=e.deltaMode===1?16:(e.deltaMode===2?window.innerHeight:1);
- const delta=e.deltaY*unit;
- // Accumulate the real scroll distance: no per-event clamp, so trackpads
- // and mouse wheels both produce a visible, continuous 360° rotation.
- lookYaw-=delta*.008;
+ const scale=e.deltaMode===1?16:(e.deltaMode===2?window.innerHeight:1);
+ lookYaw-=e.deltaY*scale*.006;
  updateFirstPersonLook();
-},{passive:false});
+},{capture:true,passive:false});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
 
 function returnToBus(){
- firstPerson=false;dragLook=false;stage.style.cursor='default';inspecting=false;controls.enabled=false;
+ firstPerson=false;firstPersonAnchor=null;inspecting=false;controls.enabled=false;
  controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;
  document.querySelector('#seatExit').classList.remove('visible');document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;
  setBusMode('interior');switchDeck(selected.deck,true);
