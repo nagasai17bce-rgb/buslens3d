@@ -51,7 +51,7 @@ const key=new THREE.DirectionalLight(0xffe3bd,3.2);key.position.set(5,12,7);key.
 const fill=new THREE.DirectionalLight(0x75a9ff,1.5);fill.position.set(-8,6,-7);scene.add(fill);
 const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
-const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(10,8,13),target:new THREE.Vector3(0,2.45,0)};let cameraMotion=0;let inspecting=false;
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;
 const data={
  lower:[
   {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
@@ -72,7 +72,7 @@ function roundedBox(parent,w,h,d,x,y,z,material,radius=.08){
  const mesh=new THREE.Mesh(geo,material);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 function makeBerth(deck,s){
- const group=new THREE.Group(),y=deck==='lower'?.78:3.18,width=.82,length=1.55;
+ const group=new THREE.Group(),y=deck==='lower'?.78:3.18,width=.9,length=1.62;
  const baseColor=s.status==='available'?'#244f7c':s.status==='female'?'#653b68':'#596474';
  const frame=mat('#29384b',.55,.18),mattress=mat(baseColor,.88),pillow=mat('#e5ded2',.92),railMat=mat('#7d8998',.48,.35);
  roundedBox(group,width,.22,length,s.x,y,s.z,frame,.09);
@@ -115,10 +115,10 @@ function build(){
   for(const z of [-4.9,-3,-1.1,.8,2.7,4.6]){const lamp=new THREE.Mesh(new THREE.BoxGeometry(.42,.025,.035),new THREE.MeshBasicMaterial({color:'#f5d7a2'}));lamp.position.set(.28,y+.14,z);g.add(lamp);}
  }
  makeDeck(lowerDeckGroup,.12);makeDeck(upperDeckGroup,2.52);root.add(lowerDeckGroup);root.add(upperDeckGroup);
- const laneX={L:-1.48,M:-.55,R:1.28,UL:-1.48,UM:-.55,UR:1.28};
+ // True 2+1 layout: two close berths on the left, a generous central aisle, one berth on the right.\n const laneX={L:-1.43,M:-.35,R:1.43,UL:-1.43,UM:-.35,UR:1.43};
  for(const d of ['lower','upper'])for(const s of data[d]){
   const prefix=s.id.startsWith('UL')?'UL':s.id.startsWith('UM')?'UM':s.id.startsWith('UR')?'UR':s.id[0];
-  s.x=laneX[prefix];const n=parseInt(s.id.replace(/^[A-Z]+/,''),10);s.z=-4.55+(n-1)*1.82;s.long=true;makeBerth(d,s);
+  s.x=laneX[prefix];const n=parseInt(s.id.replace(/^[A-Z]+/,''),10);s.z=-4.85+(n-1)*1.94;s.long=true;makeBerth(d,s);
  }
  box(root,4.55,.22,12,0,-.08,0,mat('#202a38'));
  buildExterior();
@@ -136,7 +136,7 @@ function setSelected(deck,id,openInspection=false){
  if(openInspection)inspectSelected();
 }
 function switchDeck(d,preserveSelection=false){
- currentDeck=d;document.querySelector('#stagehint').textContent=d==='both'?'BOTH DECKS · Interactive 3D reconstruction':d.toUpperCase()+' DECK · Interactive 3D reconstruction';
+ currentDeck=d;document.querySelector('#stagehint').textContent=d==='both'?'BOTH DECKS · Interactive 3D reconstruction':d.toUpperCase()+' DECK · Interactive 3D reconstruction';\n if(!inspecting){const deckY=d==='upper'?3.25:d==='lower'?1.05:2.35;const viewPos=d==='both'?new THREE.Vector3(10,8,13):d==='upper'?new THREE.Vector3(8.8,7.6,10.8):new THREE.Vector3(8.8,5.8,10.8);moveCamera(viewPos,new THREE.Vector3(0,deckY,0),650);}
  document.querySelector('#lowerbtn').classList.toggle('active',d==='lower');document.querySelector('#upperbtn').classList.toggle('active',d==='upper');
  lowerDeckGroup.visible=d!=='upper';upperDeckGroup.visible=d!=='lower';
  berthGroups.forEach(g=>{g.visible=d==='both'||g.userData.deck===d;});
