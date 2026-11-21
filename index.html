@@ -54,9 +54,9 @@ const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),
 const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;let firstPerson=false;let lookYaw=0;let lookPitch=0;let dragLook=false;let lastPointer={x:0,y:0};
 const data={
  lower:[
-  {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
-  {id:'M1',x:-.15,z:-2.65,price:670,status:'available'},{id:'M2',x:-.15,z:-1.72,price:777,status:'booked'},{id:'M3',x:-.15,z:-.78,price:599,status:'female'},{id:'M4',x:-.15,z:.16,price:599,status:'female'},{id:'M5',x:-.15,z:1.1,price:777,status:'booked'},{id:'M6',x:-.15,z:2.05,price:777,status:'booked'},
-  {id:'R1',x:1.42,z:-2.65,price:744,status:'booked'},{id:'R2',x:1.42,z:-1.72,price:699,status:'available'},{id:'R3',x:1.42,z:-.78,price:777,status:'booked'},{id:'R4',x:1.42,z:.16,price:777,status:'booked'},{id:'R5',x:1.42,z:1.1,price:699,status:'available'},{id:'R6',x:1.42,z:2.05,price:777,status:'booked'}
+  {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'available'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'available'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'available'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'available'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'available'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'available'},
+  {id:'M1',x:-.15,z:-2.65,price:670,status:'available'},{id:'M2',x:-.15,z:-1.72,price:777,status:'available'},{id:'M3',x:-.15,z:-.78,price:599,status:'available'},{id:'M4',x:-.15,z:.16,price:599,status:'available'},{id:'M5',x:-.15,z:1.1,price:777,status:'available'},{id:'M6',x:-.15,z:2.05,price:777,status:'available'},
+  {id:'R1',x:1.42,z:-2.65,price:744,status:'available'},{id:'R2',x:1.42,z:-1.72,price:699,status:'available'},{id:'R3',x:1.42,z:-.78,price:777,status:'available'},{id:'R4',x:1.42,z:.16,price:777,status:'available'},{id:'R5',x:1.42,z:1.1,price:699,status:'available'},{id:'R6',x:1.42,z:2.05,price:777,status:'available'}
  ],
  upper:[
   {id:'UL1',x:-2.25,z:-2.6,long:true,price:1666,status:'booked'},{id:'UL2',x:-2.25,z:-1.55,long:true,price:1777,status:'booked'},{id:'UL3',x:-2.25,z:-.5,long:true,price:1999,status:'booked'},{id:'UL4',x:-2.25,z:.55,long:true,price:1776,status:'booked'},{id:'UL5',x:-2.25,z:1.6,long:true,price:1776,status:'booked'},{id:'UL6',x:-2.25,z:2.65,long:true,price:1386,status:'booked'},
@@ -217,11 +217,22 @@ function switchDeck(d,preserveSelection=false){
 }
 function setBusMode(mode){
  busMode=mode;
- if(exteriorGroup){exteriorGroup.visible=true;exteriorGroup.children.forEach(obj=>{const nearSide=obj.position.x>2.3&&obj.position.y>2.0;const roof=obj.position.y>4.4;obj.visible=mode==='exterior'||(!nearSide&&!roof);});}
- document.querySelector('#view3d').classList.toggle('active',mode==='exterior');document.querySelector('#viewinterior').classList.toggle('active',mode==='interior');
- document.querySelector('#stagehint').textContent=mode==='exterior'?'JAI SAI BABA · FULL 3D EXTERIOR':'JAI SAI BABA · INTERIOR CUTAWAY · BOTH DECKS';
- if(mode==='interior'){lowerDeckGroup.visible=true;upperDeckGroup.visible=true;berthGroups.forEach(g=>g.visible=true);controls.minDistance=3;controls.maxDistance=19;}
- else{lowerDeckGroup.visible=false;upperDeckGroup.visible=false;berthGroups.forEach(g=>g.visible=false);controls.minDistance=4;controls.maxDistance=24;}
+ // Keep the exterior shell and the cabin mutually exclusive. The shell is a
+ // solid mesh, so leaving it visible in cutaway mode occludes the entire cabin.
+ if(exteriorGroup)exteriorGroup.visible=mode==='exterior';
+ document.querySelector('#view3d').classList.toggle('active',mode==='exterior');
+ document.querySelector('#viewinterior').classList.toggle('active',mode==='interior');
+ document.querySelector('#stagehint').textContent=mode==='exterior'?'JAI SAI BABA · BASIC 3D EXTERIOR':(currentDeck.toUpperCase()+' DECK · INTERIOR MODEL');
+ if(mode==='interior'){
+  lowerDeckGroup.visible=currentDeck!=='upper';
+  upperDeckGroup.visible=currentDeck!=='lower';
+  berthGroups.forEach(g=>{g.visible=currentDeck==='both'||g.userData.deck===currentDeck;});
+  controls.minDistance=3;controls.maxDistance=19;
+ }else{
+  lowerDeckGroup.visible=false;upperDeckGroup.visible=false;
+  berthGroups.forEach(g=>{g.visible=false;});
+  controls.minDistance=4;controls.maxDistance=24;
+ }
 }
 function setView(v){const is3d=v==='3d';document.querySelector('#stage').style.display=is3d?'block':'none';document.querySelector('#seatmap').style.display=is3d?'none':'block';document.querySelector('#view3d').classList.toggle('active',is3d);document.querySelector('#viewmap').classList.toggle('active',!is3d);}
 let cameraAnimating=false;
@@ -255,7 +266,7 @@ function returnToBus(){
  firstPerson=false;dragLook=false;inspecting=false;controls.enabled=false;
  controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;
  document.querySelector('#seatExit').classList.remove('visible');document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;
- setBusMode('interior');lowerDeckGroup.visible=true;upperDeckGroup.visible=true;berthGroups.forEach(g=>g.visible=true);
+ setBusMode('interior');switchDeck(selected.deck,true);
  document.querySelector('#stagehint').textContent='INTERIOR CUTAWAY · CHOOSE ANOTHER BERTH';
  const overviewPos=new THREE.Vector3(9.5,7.2,12),overviewTarget=new THREE.Vector3(0,2.35,0);
  const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone(),start=performance.now(),duration=950,token=++cameraMotion;cameraAnimating=true;
