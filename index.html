@@ -242,7 +242,7 @@ function inspectSelected(){
  const targetQuat=new THREE.Quaternion();
  const start=performance.now(),duration=1150,token=++cameraMotion;cameraAnimating=true;
  document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=true;document.querySelector('#seatExit').classList.add('visible');
- document.querySelector('#stagehint').textContent=selected.id+' · 360° SEAT VIEW · DRAG TO LOOK AROUND';
+ document.querySelector('#stagehint').textContent=selected.id+' · 360° SEAT VIEW · SCROLL TO ROTATE';
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,destination,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{camera.position.copy(destination);camera.quaternion.copy(targetQuat);cameraAnimating=false;}}
  requestAnimationFrame(step);
 }
@@ -278,12 +278,15 @@ function stopSeatLook(e){
 stage.addEventListener('pointerup',stopSeatLook);
 stage.addEventListener('pointercancel',stopSeatLook);
 stage.addEventListener('lostpointercapture',()=>{dragLook=false;stage.style.cursor=firstPerson?'grab':'default';});
-canvas.addEventListener('wheel',e=>{
- if(!firstPerson)return;
+// Scroll anywhere over the 3D stage to continuously turn the seated view.
+stage.addEventListener('wheel',e=>{
+ if(!firstPerson||cameraAnimating)return;
  e.preventDefault();
  const unit=e.deltaMode===1?16:(e.deltaMode===2?window.innerHeight:1);
- const delta=THREE.MathUtils.clamp(e.deltaY*unit,-120,120);
- lookYaw-=delta*.003;
+ const delta=e.deltaY*unit;
+ // Accumulate the real scroll distance: no per-event clamp, so trackpads
+ // and mouse wheels both produce a visible, continuous 360° rotation.
+ lookYaw-=delta*.008;
  updateFirstPersonLook();
 },{passive:false});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
