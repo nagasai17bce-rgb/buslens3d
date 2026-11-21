@@ -24,7 +24,7 @@ header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-it
 </aside>
 <main class="center">
  <div class="toolbar"><button class="tab active" id="view3d" onclick="setView('3d')">3D bus</button><button class="tab" id="viewinterior" onclick="setBusMode('interior')">Interior cutaway</button><button class="tab" id="viewmap" onclick="setView('map')">Seat map</button><button class="tab" onclick="resetCamera()">Reset view</button></div>
- <div class="stage" id="stage"><canvas id="scene"></canvas><button class="seat-exit" id="seatExit" onclick="returnToBus()">← Exit Seat View / Back to Bus (Esc)</button><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span>Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
+ <div class="stage" id="stage"><canvas id="scene"></canvas><button class="seat-exit" id="seatExit" onclick="returnToBus()">← Exit Seat View / Back to Bus (Esc)</button><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span id="stagecontrols">Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
  <div class="seatmap" id="seatmap"><div class="mapdecks"><div class="deckmap"><h3>LOWER BERTH</h3><div class="mapgrid" id="lowergrid"></div></div><div class="deckmap"><h3>UPPER BERTH</h3><div class="mapgrid" id="uppergrid"></div></div></div><div class="footnote">Approximate arrangement transcribed from the supplied MakeMyTrip seat-map screenshot. Grey = unavailable; blue = available; pink = women-only; neutral = uncertain.</div></div>
  <div class="deckswitch"><button class="deckbtn active" id="lowerbtn" onclick="switchDeck('lower')">Lower deck</button><button class="deckbtn" id="upperbtn" onclick="switchDeck('upper')">Upper deck</button><button class="deckbtn" onclick="switchDeck('both')">Both decks</button></div>
 </main>
@@ -242,7 +242,7 @@ function inspectSelected(){
  const targetQuat=new THREE.Quaternion();
  const start=performance.now(),duration=1150,token=++cameraMotion;cameraAnimating=true;
  document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=true;document.querySelector('#seatExit').classList.add('visible');
- document.querySelector('#stagehint').textContent=selected.id+' · FIXED BERTH VIEW · SCROLL FOR 360°';
+ document.querySelector('#stagehint').textContent=selected.id+' · FIXED BERTH VIEW · SCROLL FOR 360°';document.querySelector('#stagecontrols').textContent='SCROLL UP / DOWN · ROTATE 360° FROM THIS BERTH';
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,destination,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{camera.position.copy(destination);camera.quaternion.copy(targetQuat);cameraAnimating=false;}}
  requestAnimationFrame(step);
 }
@@ -269,7 +269,7 @@ function returnToBus(){
  controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;
  document.querySelector('#seatExit').classList.remove('visible');document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;
  setBusMode('interior');switchDeck(selected.deck,true);
- document.querySelector('#stagehint').textContent='INTERIOR CUTAWAY · CHOOSE ANOTHER BERTH';
+ document.querySelector('#stagehint').textContent='INTERIOR CUTAWAY · CHOOSE ANOTHER BERTH';document.querySelector('#stagecontrols').textContent='Drag to rotate · Scroll to zoom · Click a berth to inspect';
  const overviewPos=new THREE.Vector3(9.5,7.2,12),overviewTarget=new THREE.Vector3(0,2.35,0);
  const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone(),start=performance.now(),duration=950,token=++cameraMotion;cameraAnimating=true;
  const targetQuat=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(overviewPos,overviewTarget,new THREE.Vector3(0,1,0)));
