@@ -234,7 +234,7 @@ function moveCamera(position,target,duration=900){
 function inspectSelected(){
  const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;
  setView('3d');setBusMode('interior');switchDeck(selected.deck,true);
- inspecting=true;firstPerson=true;controls.enabled=false;
+ inspecting=true;firstPerson=true;stage.style.cursor='grab';controls.enabled=false;
  const berthBaseY=selected.deck==='lower'?.78:3.18;
  const destination=new THREE.Vector3(THREE.MathUtils.clamp(s.x,-1.68,1.68),berthBaseY+.48,THREE.MathUtils.clamp(s.z+.12,-5.15,5.15));
  lookYaw=0;lookPitch=0;
@@ -250,27 +250,34 @@ function updateFirstPersonLook(){
  // Yaw is unrestricted for a complete 360° turn; pitch is deliberately limited.
  camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
 }
-// Seat-view interaction: click/touch and drag to look around from the selected berth.
-canvas.addEventListener('pointerdown',e=>{
- if(!firstPerson||cameraAnimating)return;
+// Seat-view interaction: bind to the whole stage so overlays/canvas hit-testing
+// cannot swallow the drag. The camera remains at the selected berth.
+canvas.style.touchAction='none';
+canvas.style.cursor='grab';
+stage.addEventListener('pointerdown',e=>{
+ if(!firstPerson)return;
+ e.preventDefault();
  dragLook=true;lastPointer={x:e.clientX,y:e.clientY};
- canvas.setPointerCapture?.(e.pointerId);
+ stage.setPointerCapture(e.pointerId);
+ stage.style.cursor='grabbing';
 });
-canvas.addEventListener('pointermove',e=>{
+stage.addEventListener('pointermove',e=>{
  if(!firstPerson||!dragLook)return;
+ e.preventDefault();
  const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;
  lastPointer={x:e.clientX,y:e.clientY};
- lookYaw-=dx*.006;
- lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.004,-.62,.62);
+ lookYaw-=dx*.009;
+ lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.006,-.58,.58);
  updateFirstPersonLook();
 });
 function stopSeatLook(e){
  if(!dragLook)return;
- dragLook=false;
- if(e.pointerId!==undefined&&canvas.hasPointerCapture?.(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+ dragLook=false;stage.style.cursor=firstPerson?'grab':'default';
+ if(e.pointerId!==undefined&&stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);
 }
-canvas.addEventListener('pointerup',stopSeatLook);
-canvas.addEventListener('pointercancel',stopSeatLook);
+stage.addEventListener('pointerup',stopSeatLook);
+stage.addEventListener('pointercancel',stopSeatLook);
+stage.addEventListener('lostpointercapture',()=>{dragLook=false;stage.style.cursor=firstPerson?'grab':'default';});
 canvas.addEventListener('wheel',e=>{
  if(!firstPerson)return;
  e.preventDefault();
@@ -282,7 +289,7 @@ canvas.addEventListener('wheel',e=>{
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
 
 function returnToBus(){
- firstPerson=false;dragLook=false;inspecting=false;controls.enabled=false;
+ firstPerson=false;dragLook=false;stage.style.cursor='default';inspecting=false;controls.enabled=false;
  controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;
  document.querySelector('#seatExit').classList.remove('visible');document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;
  setBusMode('interior');switchDeck(selected.deck,true);
