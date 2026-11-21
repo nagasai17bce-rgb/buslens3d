@@ -10,7 +10,7 @@
 <style>
 :root{color-scheme:dark;--bg:#080d17;--panel:#101827;--line:#26354c;--muted:#91a0b8;--text:#f4f7fb;--blue:#4b91ff;--pink:#df65d7;--green:#31c48d}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#1b2b48 0,#080d17 55%);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
-header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:12px 22px;background:#0b111de8;position:sticky;top:0;z-index:5}.brand{font-size:19px;font-weight:800}.brand b{background:#e8494b;border-radius:9px;padding:7px 9px;margin-right:8px}.route{color:#dce5f5}.spacer{flex:1}.btn,.tab,.deckbtn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#18243a;color:white;cursor:pointer}.btn.primary{border:0;background:linear-gradient(120deg,#3478f6,#7857e9);font-weight:700}.layout{display:grid;grid-template-columns:245px minmax(420px,1fr) 245px;gap:14px;padding:16px;max-width:1600px;margin:auto}.card{background:linear-gradient(160deg,#121c2b,#0e1725);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}.operator{font-weight:800;font-size:16px}.sub,.muted{color:var(--muted)}.line{height:1px;background:var(--line);margin:13px 0}.kv,.legend{display:flex;justify-content:space-between;margin:10px 0;color:#cbd6e8}.section-title{font-weight:750;margin-bottom:12px}.insight{margin:10px 0;color:#cbd6e8}.stage{height:620px;position:relative;overflow:hidden;border:1px solid #263750;border-radius:17px;background:radial-gradient(ellipse at 50% 40%,#263954 0,#101b2c 50%,#0b1320 100%)}#scene{width:100%;height:100%;display:block}.stagehint{position:absolute;top:14px;left:14px;background:#101a2bd9;border:1px solid #33445f;border-radius:9px;padding:8px 11px;color:#d5e2f5;pointer-events:none}.seat-exit{display:none;position:absolute;right:14px;top:14px;z-index:3;background:#e9edf5;color:#101827;border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;box-shadow:0 5px 22px #0008}.seat-exit.visible{display:block}.stagefoot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;color:#91a0b8;font-size:12px;pointer-events:none}.toolbar,.deckswitch{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.tab.active,.deckbtn.active{background:#dce6ff;color:#101a2b;font-weight:800}.seatmap{display:none;background:#0c1421;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}.mapdecks{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:520px}.deckmap{background:#101b2a;border:1px solid #31415a;border-radius:13px;padding:12px}.deckmap h3{text-align:center;margin:2px 0 14px}.mapgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.mapseat{min-height:55px;border-radius:8px;background:#263247;border:1px solid #526079;color:#e0e8f6;display:grid;place-items:center;cursor:pointer;font-size:11px}.mapseat.long{min-height:92px}.mapseat.available{border:2px solid var(--blue);background:#152b49}.mapseat.female{border:2px solid var(--pink);background:#39203d}.mapseat.selected{outline:3px solid white}.mapseat.booked{opacity:.4;cursor:not-allowed}.empty{visibility:hidden}.price{font-size:26px;font-weight:850}.swatch{width:15px;height:15px;border-radius:4px;border:2px solid var(--blue);display:inline-block;margin-right:8px}.swatch.pink{border-color:var(--pink)}.swatch.grey{border-color:#657086}.inspect-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.inspect-actions .btn{padding:10px 8px;font-size:12px}.inspect-actions .btn:disabled{opacity:.45;cursor:not-allowed}.footnote{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}.operator-gallery{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.operator-gallery a{display:block;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#0b1320}.operator-gallery img{display:block;width:100%;height:86px;object-fit:cover}.operator-gallery a:first-child{grid-column:1/-1}.operator-gallery a:first-child img{height:118px}.operator-link{display:inline-block;color:#9fc4ff;text-decoration:none;font-size:12px;margin-top:9px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#16243a;border:1px solid #425777;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:12px 22px;background:#0b111de8;position:sticky;top:0;z-index:5}.brand{font-size:19px;font-weight:800}.brand b{background:#e8494b;border-radius:9px;padding:7px 9px;margin-right:8px}.route{color:#dce5f5}.spacer{flex:1}.btn,.tab,.deckbtn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#18243a;color:white;cursor:pointer}.btn.primary{border:0;background:linear-gradient(120deg,#3478f6,#7857e9);font-weight:700}.layout{display:grid;grid-template-columns:245px minmax(420px,1fr) 245px;gap:14px;padding:16px;max-width:1600px;margin:auto}.card{background:linear-gradient(160deg,#121c2b,#0e1725);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}.operator{font-weight:800;font-size:16px}.sub,.muted{color:var(--muted)}.line{height:1px;background:var(--line);margin:13px 0}.kv,.legend{display:flex;justify-content:space-between;margin:10px 0;color:#cbd6e8}.section-title{font-weight:750;margin-bottom:12px}.insight{margin:10px 0;color:#cbd6e8}.stage{height:620px;position:relative;overflow:hidden;border:1px solid #263750;border-radius:17px;background:radial-gradient(ellipse at 50% 40%,#263954 0,#101b2c 50%,#0b1320 100%)}#scene{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.stagehint{position:absolute;top:14px;left:14px;background:#101a2bd9;border:1px solid #33445f;border-radius:9px;padding:8px 11px;color:#d5e2f5;pointer-events:none}.seat-exit{display:none;position:absolute;right:14px;top:14px;z-index:3;background:#e9edf5;color:#101827;border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;box-shadow:0 5px 22px #0008}.seat-exit.visible{display:block}.stagefoot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;color:#91a0b8;font-size:12px;pointer-events:none}.toolbar,.deckswitch{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.tab.active,.deckbtn.active{background:#dce6ff;color:#101a2b;font-weight:800}.seatmap{display:none;background:#0c1421;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}.mapdecks{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:520px}.deckmap{background:#101b2a;border:1px solid #31415a;border-radius:13px;padding:12px}.deckmap h3{text-align:center;margin:2px 0 14px}.mapgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.mapseat{min-height:55px;border-radius:8px;background:#263247;border:1px solid #526079;color:#e0e8f6;display:grid;place-items:center;cursor:pointer;font-size:11px}.mapseat.long{min-height:92px}.mapseat.available{border:2px solid var(--blue);background:#152b49}.mapseat.female{border:2px solid var(--pink);background:#39203d}.mapseat.selected{outline:3px solid white}.mapseat.booked{opacity:.4;cursor:not-allowed}.empty{visibility:hidden}.price{font-size:26px;font-weight:850}.swatch{width:15px;height:15px;border-radius:4px;border:2px solid var(--blue);display:inline-block;margin-right:8px}.swatch.pink{border-color:var(--pink)}.swatch.grey{border-color:#657086}.inspect-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.inspect-actions .btn{padding:10px 8px;font-size:12px}.inspect-actions .btn:disabled{opacity:.45;cursor:not-allowed}.footnote{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}.operator-gallery{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.operator-gallery a{display:block;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#0b1320}.operator-gallery img{display:block;width:100%;height:86px;object-fit:cover}.operator-gallery a:first-child{grid-column:1/-1}.operator-gallery a:first-child img{height:118px}.operator-link{display:inline-block;color:#9fc4ff;text-decoration:none;font-size:12px;margin-top:9px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#16243a;border:1px solid #425777;padding:10px 16px;border-radius:10px;display:none;z-index:9}
 @media(max-width:1050px){.layout{grid-template-columns:220px minmax(320px,1fr)}.rightcol{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rightcol .card{margin:0}}
 @media(max-width:720px){header{flex-wrap:wrap}.layout{display:flex;flex-direction:column;padding:9px}.stage{height:470px}.leftcol,.rightcol{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{margin:0}.toolbar{flex-wrap:wrap}.route{display:none}}
 </style>
@@ -255,39 +255,39 @@ function updateFirstPersonLook(){
 // yaw angle. Rightward drag and downward scroll turn the view to the right;
 // leftward drag and upward scroll turn it to the left.
 let berthPointerId=null,berthLastX=0,berthLastY=0,berthDragged=false,suppressStageClick=false;
-renderer.domElement.addEventListener('pointerdown',e=>{
+stage.style.touchAction='pan-x pan-y';
+stage.addEventListener('pointerdown',e=>{
  if(!firstPerson||cameraAnimating||e.button!==0)return;
  berthPointerId=e.pointerId;berthLastX=e.clientX;berthLastY=e.clientY;berthDragged=false;
- renderer.domElement.setPointerCapture(e.pointerId);
+ stage.style.touchAction='none';
  e.preventDefault();
 });
-renderer.domElement.addEventListener('pointermove',e=>{
+window.addEventListener('pointermove',e=>{
  if(!firstPerson||berthPointerId!==e.pointerId||cameraAnimating)return;
  const dx=e.clientX-berthLastX,dy=e.clientY-berthLastY;
  berthLastX=e.clientX;berthLastY=e.clientY;
  if(Math.abs(dx)+Math.abs(dy)>1)berthDragged=true;
- // Horizontal movement rotates through 360 degrees; vertical movement gives
- // a restrained look up/down without allowing the camera to flip.
+ // One shared yaw accumulator keeps drag and wheel rotation continuous.
  lookYaw-=dx*.008;
  lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.004,-.42,.32);
  updateFirstPersonLook();
  e.preventDefault();
-});
+},{passive:false});
 function endBerthDrag(e){
  if(berthPointerId!==e.pointerId)return;
  if(berthDragged)suppressStageClick=true;
  berthPointerId=null;
- if(renderer.domElement.hasPointerCapture(e.pointerId))renderer.domElement.releasePointerCapture(e.pointerId);
+ stage.style.touchAction='none';
 }
-renderer.domElement.addEventListener('pointerup',endBerthDrag);
-renderer.domElement.addEventListener('pointercancel',endBerthDrag);
-renderer.domElement.addEventListener('wheel',e=>{
+window.addEventListener('pointerup',endBerthDrag);
+window.addEventListener('pointercancel',endBerthDrag);
+stage.addEventListener('wheel',e=>{
  if(!firstPerson||cameraAnimating)return;
  e.preventDefault();
  const delta=e.deltaMode===1?e.deltaY*16:(e.deltaMode===2?e.deltaY*stage.clientHeight:e.deltaY);
  lookYaw-=delta*.008;
  updateFirstPersonLook();
-},{passive:false});
+},{capture:true,passive:false});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
 
 function returnToBus(){
@@ -308,7 +308,7 @@ function mapSeat(deck,s){if(!s)return Object.assign(document.createElement('div'
 for(const d of ['lower','upper']){const grid=document.querySelector('#'+d+'grid');const entries=data[d];const mids=entries.filter(s=>/^M|^UM/.test(s.id));const rights=entries.filter(s=>/^R|^UR/.test(s.id));for(let row=0;row<6;row++){const long=entries.find(s=>s.long&&s.id===(d==='lower'?'L':'UL')+(row+1));grid.append(mapSeat(d,long));grid.append(mapSeat(d,mids[row]));grid.append(mapSeat(d,rights[row]));}}
 setSelected('lower','M1');switchDeck('lower',true);
 const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
-renderer.domElement.addEventListener('click',e=>{if(suppressStageClick){suppressStageClick=false;e.stopImmediatePropagation();return;}const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.parent&&m.parent.visible),true);if(hits.length){const u=hits[0].object.userData;if(u&&u.seat){switchDeck(u.deck,true);setSelected(u.deck,u.seat.id,true);}}});
+renderer.domElement.addEventListener('click',e=>{if(firstPerson||suppressStageClick){suppressStageClick=false;e.stopImmediatePropagation();return;}const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.parent&&m.parent.visible),true);if(hits.length){const u=hits[0].object.userData;if(u&&u.seat){switchDeck(u.deck,true);setSelected(u.deck,u.seat.id,true);}}});
 function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
