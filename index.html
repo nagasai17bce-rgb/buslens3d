@@ -251,10 +251,37 @@ function updateFirstPersonLook(){
  if(firstPersonAnchor)camera.position.copy(firstPersonAnchor);
  camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
 }
-// In the selected-berth view, wheel / trackpad scrolling rotates the view
-// around the berth just as dragging rotates the overview. Bind directly to the
-// 3D stage so the gesture is reliable and does not depend on pointer coordinates.
-stage.addEventListener('wheel',e=>{
+// In berth view, both wheel/trackpad and pointer dragging control the same
+// yaw angle. Rightward drag and downward scroll turn the view to the right;
+// leftward drag and upward scroll turn it to the left.
+let berthPointerId=null,berthLastX=0,berthLastY=0,berthDragged=false,suppressStageClick=false;
+renderer.domElement.addEventListener('pointerdown',e=>{
+ if(!firstPerson||cameraAnimating||e.button!==0)return;
+ berthPointerId=e.pointerId;berthLastX=e.clientX;berthLastY=e.clientY;berthDragged=false;
+ renderer.domElement.setPointerCapture(e.pointerId);
+ e.preventDefault();
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+ if(!firstPerson||berthPointerId!==e.pointerId||cameraAnimating)return;
+ const dx=e.clientX-berthLastX,dy=e.clientY-berthLastY;
+ berthLastX=e.clientX;berthLastY=e.clientY;
+ if(Math.abs(dx)+Math.abs(dy)>1)berthDragged=true;
+ // Horizontal movement rotates through 360 degrees; vertical movement gives
+ // a restrained look up/down without allowing the camera to flip.
+ lookYaw-=dx*.008;
+ lookPitch=THREE.MathUtils.clamp(lookPitch-dy*.004,-.42,.32);
+ updateFirstPersonLook();
+ e.preventDefault();
+});
+function endBerthDrag(e){
+ if(berthPointerId!==e.pointerId)return;
+ if(berthDragged)suppressStageClick=true;
+ berthPointerId=null;
+ if(renderer.domElement.hasPointerCapture(e.pointerId))renderer.domElement.releasePointerCapture(e.pointerId);
+}
+renderer.domElement.addEventListener('pointerup',endBerthDrag);
+renderer.domElement.addEventListener('pointercancel',endBerthDrag);
+renderer.domElement.addEventListener('wheel',e=>{
  if(!firstPerson||cameraAnimating)return;
  e.preventDefault();
  const delta=e.deltaMode===1?e.deltaY*16:(e.deltaMode===2?e.deltaY*stage.clientHeight:e.deltaY);
@@ -281,7 +308,7 @@ function mapSeat(deck,s){if(!s)return Object.assign(document.createElement('div'
 for(const d of ['lower','upper']){const grid=document.querySelector('#'+d+'grid');const entries=data[d];const mids=entries.filter(s=>/^M|^UM/.test(s.id));const rights=entries.filter(s=>/^R|^UR/.test(s.id));for(let row=0;row<6;row++){const long=entries.find(s=>s.long&&s.id===(d==='lower'?'L':'UL')+(row+1));grid.append(mapSeat(d,long));grid.append(mapSeat(d,mids[row]));grid.append(mapSeat(d,rights[row]));}}
 setSelected('lower','M1');switchDeck('lower',true);
 const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
-renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.parent&&m.parent.visible),true);if(hits.length){const u=hits[0].object.userData;if(u&&u.seat){switchDeck(u.deck,true);setSelected(u.deck,u.seat.id,true);}}});
+renderer.domElement.addEventListener('click',e=>{if(suppressStageClick){suppressStageClick=false;e.stopImmediatePropagation();return;}const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(berthMeshes.filter(m=>m.parent&&m.parent.visible),true);if(hits.length){const u=hits[0].object.userData;if(u&&u.seat){switchDeck(u.deck,true);setSelected(u.deck,u.seat.id,true);}}});
 function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
