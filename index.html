@@ -10,7 +10,7 @@
 <style>
 :root{color-scheme:dark;--bg:#080d17;--panel:#101827;--line:#26354c;--muted:#91a0b8;--text:#f4f7fb;--blue:#4b91ff;--pink:#df65d7;--green:#31c48d}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#1b2b48 0,#080d17 55%);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
-header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:12px 22px;background:#0b111de8;position:sticky;top:0;z-index:5}.brand{font-size:19px;font-weight:800}.brand b{background:#e8494b;border-radius:9px;padding:7px 9px;margin-right:8px}.route{color:#dce5f5}.spacer{flex:1}.btn,.tab,.deckbtn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#18243a;color:white;cursor:pointer}.btn.primary{border:0;background:linear-gradient(120deg,#3478f6,#7857e9);font-weight:700}.layout{display:grid;grid-template-columns:245px minmax(420px,1fr) 245px;gap:14px;padding:16px;max-width:1600px;margin:auto}.card{background:linear-gradient(160deg,#121c2b,#0e1725);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}.operator{font-weight:800;font-size:16px}.sub,.muted{color:var(--muted)}.line{height:1px;background:var(--line);margin:13px 0}.kv,.legend{display:flex;justify-content:space-between;margin:10px 0;color:#cbd6e8}.section-title{font-weight:750;margin-bottom:12px}.insight{margin:10px 0;color:#cbd6e8}.stage{height:620px;position:relative;overflow:hidden;border:1px solid #263750;border-radius:17px;background:radial-gradient(ellipse at 50% 40%,#263954 0,#101b2c 50%,#0b1320 100%)}#scene{width:100%;height:100%;display:block}.stagehint{position:absolute;top:14px;left:14px;background:#101a2bd9;border:1px solid #33445f;border-radius:9px;padding:8px 11px;color:#d5e2f5;pointer-events:none}.stagefoot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;color:#91a0b8;font-size:12px;pointer-events:none}.toolbar,.deckswitch{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.tab.active,.deckbtn.active{background:#dce6ff;color:#101a2b;font-weight:800}.seatmap{display:none;background:#0c1421;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}.mapdecks{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:520px}.deckmap{background:#101b2a;border:1px solid #31415a;border-radius:13px;padding:12px}.deckmap h3{text-align:center;margin:2px 0 14px}.mapgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.mapseat{min-height:55px;border-radius:8px;background:#263247;border:1px solid #526079;color:#e0e8f6;display:grid;place-items:center;cursor:pointer;font-size:11px}.mapseat.long{min-height:92px}.mapseat.available{border:2px solid var(--blue);background:#152b49}.mapseat.female{border:2px solid var(--pink);background:#39203d}.mapseat.selected{outline:3px solid white}.mapseat.booked{opacity:.4;cursor:not-allowed}.empty{visibility:hidden}.price{font-size:26px;font-weight:850}.swatch{width:15px;height:15px;border-radius:4px;border:2px solid var(--blue);display:inline-block;margin-right:8px}.swatch.pink{border-color:var(--pink)}.swatch.grey{border-color:#657086}.inspect-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.inspect-actions .btn{padding:10px 8px;font-size:12px}.inspect-actions .btn:disabled{opacity:.45;cursor:not-allowed}.footnote{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}.operator-gallery{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.operator-gallery a{display:block;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#0b1320}.operator-gallery img{display:block;width:100%;height:86px;object-fit:cover}.operator-gallery a:first-child{grid-column:1/-1}.operator-gallery a:first-child img{height:118px}.operator-link{display:inline-block;color:#9fc4ff;text-decoration:none;font-size:12px;margin-top:9px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#16243a;border:1px solid #425777;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:12px 22px;background:#0b111de8;position:sticky;top:0;z-index:5}.brand{font-size:19px;font-weight:800}.brand b{background:#e8494b;border-radius:9px;padding:7px 9px;margin-right:8px}.route{color:#dce5f5}.spacer{flex:1}.btn,.tab,.deckbtn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#18243a;color:white;cursor:pointer}.btn.primary{border:0;background:linear-gradient(120deg,#3478f6,#7857e9);font-weight:700}.layout{display:grid;grid-template-columns:245px minmax(420px,1fr) 245px;gap:14px;padding:16px;max-width:1600px;margin:auto}.card{background:linear-gradient(160deg,#121c2b,#0e1725);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}.operator{font-weight:800;font-size:16px}.sub,.muted{color:var(--muted)}.line{height:1px;background:var(--line);margin:13px 0}.kv,.legend{display:flex;justify-content:space-between;margin:10px 0;color:#cbd6e8}.section-title{font-weight:750;margin-bottom:12px}.insight{margin:10px 0;color:#cbd6e8}.stage{height:620px;position:relative;overflow:hidden;border:1px solid #263750;border-radius:17px;background:radial-gradient(ellipse at 50% 40%,#263954 0,#101b2c 50%,#0b1320 100%)}#scene{width:100%;height:100%;display:block}.stagehint{position:absolute;top:14px;left:14px;background:#101a2bd9;border:1px solid #33445f;border-radius:9px;padding:8px 11px;color:#d5e2f5;pointer-events:none}.seat-exit{display:none;position:absolute;right:14px;top:14px;z-index:3;background:#e9edf5;color:#101827;border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;box-shadow:0 5px 22px #0008}.seat-exit.visible{display:block}.stagefoot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;color:#91a0b8;font-size:12px;pointer-events:none}.toolbar,.deckswitch{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.tab.active,.deckbtn.active{background:#dce6ff;color:#101a2b;font-weight:800}.seatmap{display:none;background:#0c1421;border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}.mapdecks{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:520px}.deckmap{background:#101b2a;border:1px solid #31415a;border-radius:13px;padding:12px}.deckmap h3{text-align:center;margin:2px 0 14px}.mapgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.mapseat{min-height:55px;border-radius:8px;background:#263247;border:1px solid #526079;color:#e0e8f6;display:grid;place-items:center;cursor:pointer;font-size:11px}.mapseat.long{min-height:92px}.mapseat.available{border:2px solid var(--blue);background:#152b49}.mapseat.female{border:2px solid var(--pink);background:#39203d}.mapseat.selected{outline:3px solid white}.mapseat.booked{opacity:.4;cursor:not-allowed}.empty{visibility:hidden}.price{font-size:26px;font-weight:850}.swatch{width:15px;height:15px;border-radius:4px;border:2px solid var(--blue);display:inline-block;margin-right:8px}.swatch.pink{border-color:var(--pink)}.swatch.grey{border-color:#657086}.inspect-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.inspect-actions .btn{padding:10px 8px;font-size:12px}.inspect-actions .btn:disabled{opacity:.45;cursor:not-allowed}.footnote{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px}.operator-gallery{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.operator-gallery a{display:block;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#0b1320}.operator-gallery img{display:block;width:100%;height:86px;object-fit:cover}.operator-gallery a:first-child{grid-column:1/-1}.operator-gallery a:first-child img{height:118px}.operator-link{display:inline-block;color:#9fc4ff;text-decoration:none;font-size:12px;margin-top:9px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#16243a;border:1px solid #425777;padding:10px 16px;border-radius:10px;display:none;z-index:9}
 @media(max-width:1050px){.layout{grid-template-columns:220px minmax(320px,1fr)}.rightcol{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rightcol .card{margin:0}}
 @media(max-width:720px){header{flex-wrap:wrap}.layout{display:flex;flex-direction:column;padding:9px}.stage{height:470px}.leftcol,.rightcol{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{margin:0}.toolbar{flex-wrap:wrap}.route{display:none}}
 </style>
@@ -24,7 +24,7 @@ header{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-it
 </aside>
 <main class="center">
  <div class="toolbar"><button class="tab active" id="view3d" onclick="setView('3d')">3D bus</button><button class="tab" id="viewinterior" onclick="setBusMode('interior')">Interior cutaway</button><button class="tab" id="viewmap" onclick="setView('map')">Seat map</button><button class="tab" onclick="resetCamera()">Reset view</button></div>
- <div class="stage" id="stage"><canvas id="scene"></canvas><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span>Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
+ <div class="stage" id="stage"><canvas id="scene"></canvas><button class="seat-exit" id="seatExit" onclick="returnToBus()">← Exit Seat View / Back to Bus (Esc)</button><div class="stagehint" id="stagehint">LOWER DECK · Interactive 3D reconstruction</div><div class="stagefoot"><span>Drag to rotate · Scroll to zoom · Click a berth to inspect</span><span>Concept model · physical dimensions estimated</span></div></div>
  <div class="seatmap" id="seatmap"><div class="mapdecks"><div class="deckmap"><h3>LOWER BERTH</h3><div class="mapgrid" id="lowergrid"></div></div><div class="deckmap"><h3>UPPER BERTH</h3><div class="mapgrid" id="uppergrid"></div></div></div><div class="footnote">Approximate arrangement transcribed from the supplied MakeMyTrip seat-map screenshot. Grey = unavailable; blue = available; pink = women-only; neutral = uncertain.</div></div>
  <div class="deckswitch"><button class="deckbtn active" id="lowerbtn" onclick="switchDeck('lower')">Lower deck</button><button class="deckbtn" id="upperbtn" onclick="switchDeck('upper')">Upper deck</button><button class="deckbtn" onclick="switchDeck('both')">Both decks</button></div>
 </main>
@@ -51,7 +51,7 @@ const key=new THREE.DirectionalLight(0xffe3bd,3.2);key.position.set(5,12,7);key.
 const fill=new THREE.DirectionalLight(0x75a9ff,1.5);fill.position.set(-8,6,-7);scene.add(fill);
 const mat=(c,r=.72,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const shell=mat('#d9e0e9',.4,.2),floorMat=mat('#303c4e'),seatMat=mat('#8b8176'),pillowMat=mat('#ded5c8'),glassMat=new THREE.MeshStandardMaterial({color:'#263c55',roughness:.2,metalness:.2,transparent:true,opacity:.55}),trim=mat('#d6a56a',.4,.25);
-const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;
+const root=new THREE.Group();scene.add(root);let berthMeshes=[];let berthGroups=[];let lowerDeckGroup,upperDeckGroup,exteriorGroup;let busMode='exterior';let currentDeck='lower';let selected={deck:'lower',id:'M1'};const initialCamera={position:new THREE.Vector3(8.8,5.8,10.8),target:new THREE.Vector3(0,1.05,0)};let cameraMotion=0;let inspecting=false;let firstPerson=false;let lookYaw=0;let lookPitch=0;let dragLook=false;let lastPointer={x:0,y:0};
 const data={
  lower:[
   {id:'L1',x:-2.25,z:-2.6,long:true,price:2084,status:'booked'},{id:'L2',x:-2.25,z:-1.55,long:true,price:2110,status:'booked'},{id:'L3',x:-2.25,z:-.5,long:true,price:2165,status:'booked'},{id:'L4',x:-2.25,z:.55,long:true,price:1943,status:'booked'},{id:'L5',x:-2.25,z:1.6,long:true,price:1943,status:'booked'},{id:'L6',x:-2.25,z:2.65,long:true,price:1443,status:'booked'},
@@ -105,9 +105,28 @@ function build(){
  function makeDeck(g,y){
   box(g,4.35,.18,11.8,0,y,0,floorMat);
   box(g,4.35,.16,.14,0,y+1.85,-5.9,shell);box(g,4.35,.16,.14,0,y+1.85,5.9,shell);
+  // Tinted panoramic windows, structural pillars and privacy curtains.
+  const tint=new THREE.MeshStandardMaterial({color:'#29445e',roughness:.24,metalness:.08,transparent:true,opacity:.62,side:THREE.DoubleSide});
   for(let z=-5;z<=5;z+=1.95){
-   const win=new THREE.Mesh(new THREE.BoxGeometry(.045,1.05,1.55),glassMat);win.position.set(-2.12,y+1.15,z);g.add(win);
-   const win2=win.clone();win2.position.x=2.12;g.add(win2);
+   const win=new THREE.Mesh(new THREE.BoxGeometry(.035,1.02,1.62),tint);win.position.set(-2.105,y+1.18,z);g.add(win);
+   const win2=win.clone();win2.position.x=2.105;g.add(win2);
+   for(const side of [-1,1]){
+    box(g,.09,1.35,.12,side*2.06,y+1.17,z-.88,mat('#687789',.45,.3));
+    box(g,.09,1.35,.12,side*2.06,y+1.17,z+.88,mat('#687789',.45,.3));
+    const curtain=mat('#6d5360',.95);box(g,.035,.92,.12,side*2.0,y+1.2,z-.72,curtain,false);box(g,.035,.92,.12,side*2.0,y+1.2,z+.72,curtain,false);
+   }
+  }
+  // Overhead luggage racks and guard rails on both sides.
+  for(const side of [-1,1]){
+   box(g,.46,.075,10.7,side*1.72,y+1.73,0,mat('#a8b0ba',.42,.45));
+   box(g,.055,.22,10.7,side*1.94,y+1.84,0,mat('#c2c9d1',.35,.5));
+  }
+  // Central AC duct, individual vents, and reading lamps.
+  box(g,.34,.12,11.1,0,y+1.83,0,mat('#d8dde4',.48,.18));
+  for(const z of [-4.7,-2.8,-.9,1,2.9,4.8]){
+   box(g,.32,.045,.25,0,y+1.75,z,mat('#667587',.5,.35),false);
+   for(let k=-2;k<=2;k++)box(g,.025,.012,.18,k*.055,y+1.72,z,mat('#dbe3eb',.4,.25),false);
+   const lamp=new THREE.Mesh(new THREE.SphereGeometry(.055,12,8),new THREE.MeshBasicMaterial({color:'#ffe3a6'}));lamp.position.set(.35,y+1.7,z);g.add(lamp);
   }
   box(g,.12,.72,11.8,-2.16,y+.48,0,shell);box(g,.12,.72,11.8,2.16,y+.48,0,shell);
   box(g,4.35,.07,.08,0,y+1.94,0,trim,false);
@@ -159,9 +178,40 @@ function moveCamera(position,target,duration=900){
  function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,position,ease);controls.target.lerpVectors(fromTarget,target,ease);camera.lookAt(controls.target);if(t<1)requestAnimationFrame(step);else{cameraAnimating=false;controls.enabled=true;controls.update();}}
  requestAnimationFrame(step);
 }
-function inspectSelected(){const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;setView('3d');setBusMode('interior');switchDeck(selected.deck,true);const g=berthGroups.find(v=>v.userData.deck===selected.deck&&v.userData.id===selected.id);if(!g)return;const y=selected.deck==='lower'?.78:3.18;const aisleX=s.x<-1?-.58:.36;const zOffset=s.z>3?-1.65:1.65;const target=new THREE.Vector3(s.x,y+.22,s.z);const pos=new THREE.Vector3(aisleX,y+1.02,s.z+zOffset);controls.minDistance=.55;controls.maxDistance=7.5;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI-.08;controls.enableRotate=true;controls.enableZoom=true;controls.enablePan=true;inspecting=true;document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=false;document.querySelector('#stagehint').textContent=selected.id+' · '+selected.deck.toUpperCase()+' BERTH INTERIOR · DRAG TO ORBIT';moveCamera(pos,target,1050);}
-function returnToBus(){inspecting=false;controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;document.querySelector('#stagehint').textContent=currentDeck==='both'?'BOTH DECKS · Interactive 3D reconstruction':currentDeck.toUpperCase()+' DECK · Interactive 3D reconstruction';moveCamera(initialCamera.position,initialCamera.target,850);}
-function resetCamera(){if(inspecting){returnToBus();return;}moveCamera(initialCamera.position,initialCamera.target,650);}
+function inspectSelected(){
+ const s=data[selected.deck].find(v=>v.id===selected.id);if(!s)return;
+ setView('3d');setBusMode('interior');switchDeck(selected.deck,true);
+ inspecting=true;firstPerson=true;controls.enabled=false;
+ const floorY=selected.deck==='lower'?.12:2.52;
+ const destination=new THREE.Vector3(THREE.MathUtils.clamp(s.x,-1.68,1.68),floorY+.66,THREE.MathUtils.clamp(s.z+.12,-5.15,5.15));
+ lookYaw=0;lookPitch=0;
+ const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone();
+ const targetQuat=new THREE.Quaternion();
+ const start=performance.now(),duration=1150,token=++cameraMotion;cameraAnimating=true;
+ document.querySelector('#inspectbtn').hidden=true;document.querySelector('#backbtn').hidden=true;document.querySelector('#seatExit').classList.add('visible');
+ document.querySelector('#stagehint').textContent=selected.id+' · FIRST-PERSON BERTH VIEW · DRAG TO LOOK 360°';
+ function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,destination,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{camera.position.copy(destination);camera.quaternion.copy(targetQuat);cameraAnimating=false;}}
+ requestAnimationFrame(step);
+}
+function updateFirstPersonLook(){camera.quaternion.setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));}
+canvas.addEventListener('pointerdown',e=>{if(!firstPerson)return;dragLook=true;lastPointer={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!firstPerson||!dragLook)return;const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;lastPointer={x:e.clientX,y:e.clientY};lookYaw-=dx*.0045;lookPitch-=dy*.0038;lookPitch=THREE.MathUtils.clamp(lookPitch,-1.28,1.28);updateFirstPersonLook();});
+canvas.addEventListener('pointerup',()=>{dragLook=false;});canvas.addEventListener('pointercancel',()=>{dragLook=false;});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&firstPerson){e.preventDefault();returnToBus();}});
+
+function returnToBus(){
+ firstPerson=false;dragLook=false;inspecting=false;controls.enabled=false;
+ controls.minDistance=4;controls.maxDistance=24;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.49;
+ document.querySelector('#seatExit').classList.remove('visible');document.querySelector('#backbtn').hidden=true;document.querySelector('#inspectbtn').hidden=false;
+ setBusMode('interior');lowerDeckGroup.visible=true;upperDeckGroup.visible=true;berthGroups.forEach(g=>g.visible=true);
+ document.querySelector('#stagehint').textContent='INTERIOR CUTAWAY · CHOOSE ANOTHER BERTH';
+ const overviewPos=new THREE.Vector3(9.5,7.2,12),overviewTarget=new THREE.Vector3(0,2.35,0);
+ const fromPos=camera.position.clone(),fromQuat=camera.quaternion.clone(),start=performance.now(),duration=950,token=++cameraMotion;cameraAnimating=true;
+ const targetQuat=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(overviewPos,overviewTarget,new THREE.Vector3(0,1,0)));
+ function step(now){if(token!==cameraMotion)return;const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);camera.position.lerpVectors(fromPos,overviewPos,ease);camera.quaternion.slerpQuaternions(fromQuat,targetQuat,ease);if(t<1)requestAnimationFrame(step);else{cameraAnimating=false;controls.target.copy(overviewTarget);controls.enabled=true;controls.update();}}
+ requestAnimationFrame(step);
+}
+function resetCamera(){if(firstPerson||inspecting){returnToBus();return;}moveCamera(initialCamera.position,initialCamera.target,650);}
 function openBooking(){window.open('https://www.jaisaibabatravels.com/','_blank','noopener');}
 function mapSeat(deck,s){if(!s)return Object.assign(document.createElement('div'),{className:'empty'});const el=document.createElement('button');el.className='mapseat '+(s.long?'long ':'')+s.status;el.dataset.deck=deck;el.dataset.id=s.id;el.innerHTML='<b>'+s.id+'</b><small>₹'+s.price+'</small>';el.onclick=()=>{if(s.status!=='booked'){switchDeck(deck,true);setView('3d');setSelected(deck,s.id,true);}};return el;}
 for(const d of ['lower','upper']){const grid=document.querySelector('#'+d+'grid');const entries=data[d];const mids=entries.filter(s=>/^M|^UM/.test(s.id));const rights=entries.filter(s=>/^R|^UR/.test(s.id));for(let row=0;row<6;row++){const long=entries.find(s=>s.long&&s.id===(d==='lower'?'L':'UL')+(row+1));grid.append(mapSeat(d,long));grid.append(mapSeat(d,mids[row]));grid.append(mapSeat(d,rights[row]));}}
@@ -171,7 +221,7 @@ renderer.domElement.addEventListener('click',e=>{const r=renderer.domElement.get
 function toast(t){const e=document.querySelector('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage);resize();
-function animate(){requestAnimationFrame(animate);if(!cameraAnimating)controls.update();renderer.render(scene,camera);}animate();
+function animate(){requestAnimationFrame(animate);if(!cameraAnimating&&!firstPerson)controls.update();renderer.render(scene,camera);}animate();
 window.switchDeck=switchDeck;window.setView=setView;window.setBusMode=setBusMode;window.resetCamera=resetCamera;window.openBooking=openBooking;window.inspectSelected=inspectSelected;window.returnToBus=returnToBus;
 </script>
 </body></html>
