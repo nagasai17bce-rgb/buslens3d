@@ -155,44 +155,34 @@ function buildExterior(){
 function build(){
  lowerDeckGroup=new THREE.Group();upperDeckGroup=new THREE.Group();
  function makeDeck(g,y){
-  box(g,4.35,.18,11.8,0,y,0,floorMat);
-  box(g,4.35,.16,.14,0,y+1.85,-5.9,shell);box(g,4.35,.16,.14,0,y+1.85,5.9,shell);
-  // Tinted panoramic windows, structural pillars and privacy curtains.
-  const tint=new THREE.MeshStandardMaterial({color:'#29445e',roughness:.24,metalness:.08,transparent:true,opacity:.62,side:THREE.DoubleSide});
-  for(let z=-5;z<=5;z+=1.95){
-   const win=new THREE.Mesh(new THREE.BoxGeometry(.035,1.02,1.62),tint);win.position.set(-2.105,y+1.18,z);g.add(win);
-   const win2=win.clone();win2.position.x=2.105;g.add(win2);
-   for(const side of [-1,1]){
-    box(g,.09,1.35,.12,side*2.06,y+1.17,z-.88,mat('#687789',.45,.3));
-    box(g,.09,1.35,.12,side*2.06,y+1.17,z+.88,mat('#687789',.45,.3));
-    const curtain=mat('#6d5360',.95);box(g,.035,.92,.12,side*2.0,y+1.2,z-.72,curtain,false);box(g,.035,.92,.12,side*2.0,y+1.2,z+.72,curtain,false);
+  // Minimal open cutaway: one floor, slim side frames and separated window panes.
+  // No solid side walls or roof in cutaway mode, so berths remain fully visible.
+  box(g,4.2,.14,11.8,0,y,0,floorMat);
+  const frame=mat('#8995a4',.48,.28);
+  const windowMat=new THREE.MeshPhysicalMaterial({color:'#34536e',roughness:.2,metalness:.12,transparent:true,opacity:.34,side:THREE.DoubleSide});
+  for(const side of [-1,1]){
+   // Low edge rail only; keep the side of the bus open for a clear cutaway view.
+   box(g,.07,.42,11.7,side*2.05,y+.28,0,frame,false);
+   for(let i=0;i<6;i++){
+    const z=-4.85+i*1.94;
+    const pane=new THREE.Mesh(new THREE.BoxGeometry(.035,.92,1.58),windowMat);
+    pane.position.set(side*2.0,y+1.08,z);pane.castShadow=false;g.add(pane);
+    box(g,.045,1.02,.055,side*2.0,y+1.08,z-.82,frame,false);
+    box(g,.045,1.02,.055,side*2.0,y+1.08,z+.82,frame,false);
    }
   }
-  // Overhead luggage racks and guard rails on both sides.
-  for(const side of [-1,1]){
-   box(g,.46,.075,10.7,side*1.72,y+1.73,0,mat('#a8b0ba',.42,.45));
-   box(g,.055,.22,10.7,side*1.94,y+1.84,0,mat('#c2c9d1',.35,.5));
-  }
-  // Central AC duct, individual vents, and reading lamps.
-  box(g,.34,.12,11.1,0,y+1.83,0,mat('#d8dde4',.48,.18));
-  for(const z of [-4.7,-2.8,-.9,1,2.9,4.8]){
-   box(g,.32,.045,.25,0,y+1.75,z,mat('#667587',.5,.35),false);
-   for(let k=-2;k<=2;k++)box(g,.025,.012,.18,k*.055,y+1.72,z,mat('#dbe3eb',.4,.25),false);
-   const lamp=new THREE.Mesh(new THREE.SphereGeometry(.055,12,8),new THREE.MeshBasicMaterial({color:'#ffe3a6'}));lamp.position.set(.35,y+1.7,z);g.add(lamp);
-  }
-  box(g,.12,.72,11.8,-2.16,y+.48,0,shell);box(g,.12,.72,11.8,2.16,y+.48,0,shell);
-  box(g,4.35,.07,.08,0,y+1.94,0,trim,false);
-  box(g,.72,.025,11.2,.28,y+.105,0,mat('#b4a18a'),false);
-  for(const z of [-4.9,-3,-1.1,.8,2.7,4.6]){const lamp=new THREE.Mesh(new THREE.BoxGeometry(.42,.025,.035),new THREE.MeshBasicMaterial({color:'#f5d7a2'}));lamp.position.set(.28,y+.14,z);g.add(lamp);}
+  // Simple end bulkheads define the cabin without obscuring the berths.
+  box(g,4.1,1.55,.09,0,y+.82,-5.86,frame,false);
+  box(g,4.1,1.55,.09,0,y+.82,5.86,frame,false);
  }
  makeDeck(lowerDeckGroup,.12);makeDeck(upperDeckGroup,2.52);root.add(lowerDeckGroup);root.add(upperDeckGroup);
  // True 2+1 layout: two close berths on the left, a generous central aisle, one berth on the right.
- const laneX={L:-1.43,M:-.35,R:1.43,UL:-1.43,UM:-.35,UR:1.43};
+ const laneX={L:-1.48,M:-.43,R:1.48,UL:-1.48,UM:-.43,UR:1.48};
  for(const d of ['lower','upper'])for(const s of data[d]){
   const prefix=s.id.startsWith('UL')?'UL':s.id.startsWith('UM')?'UM':s.id.startsWith('UR')?'UR':s.id[0];
   s.x=laneX[prefix];const n=parseInt(s.id.replace(/^[A-Z]+/,''),10);s.z=-4.85+(n-1)*1.94;s.long=true;makeBerth(d,s);
  }
- box(root,4.55,.22,12,0,-.08,0,mat('#202a38'));
+ // Shared base omitted: each deck owns its own floor to avoid z-fighting.
  buildExterior();
 }
 build();setBusMode('exterior');controls.target.copy(initialCamera.target);controls.update();controls.saveState();
