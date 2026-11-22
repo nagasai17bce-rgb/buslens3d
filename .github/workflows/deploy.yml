@@ -20,6 +20,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,27 +60,8 @@ jobs:
           print(f'Restored {len(parts)} verified source segments')
           PY
 
-      - name: Keep the 3D canvas visible
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path('web/js/app.js')
-          source = path.read_text()
-          before = "  if(!selectedModel)return;\n  if(!viewer&&!viewerFailure){"
-          after = "  if(!selectedModel)return;\n  if(!viewer&&!viewerFailure) $(\"#bus-viewer\").innerHTML=\"<div class=\\\"viewer-loading\\\"><span class=\\\"loading-ring\\\"></span><span>Opening the bus interior…</span></div>\";\n  if(!viewer&&!viewerFailure){"
-          spinner = "    $(\"#bus-viewer\").innerHTML=\"<div class=\\\"viewer-loading\\\"><span class=\\\"loading-ring\\\"></span><span>Opening the bus interior…</span></div>\";\n"
-
-          if before in source:
-              source = source.replace(before, after, 1)
-              if source.count(spinner) != 1:
-                  raise SystemExit('Could not uniquely locate the post-canvas spinner')
-              source = source.replace(spinner, '', 1)
-              path.write_text(source)
-          elif after.split('\\n')[1] not in source or spinner in source:
-              raise SystemExit('Unexpected viewer source; refusing an unsafe edit')
-          print('The loading message now appears before the canvas is created.')
-          PY
+      - name: Prepare the static build and viewer
+        run: python .github/scripts/prepare_build.py
 
       - name: Generate representative 3D models and public catalogue
         run: |
@@ -94,6 +76,11 @@ jobs:
           node --check web/js/viewer/three.js
           node tests-js/smoke.js
 
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.65.1 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
@@ -107,3 +94,17 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Test production 3D flows with Chromium
+        env:
+          BUSLENS_BASE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node .github/scripts/test_3d_viewer.mjs
+
+      - name: Save 3D proof screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: buslens3d-3d-viewer-screenshots
+          path: artifacts/3d-viewer/*.png
+          retention-days: 14
+          if-no-files-found: ignore
