@@ -1,4 +1,4 @@
-name: Deploy BusLens 3D to GitHub Pages
+name: Deploy BusLens3D to GitHub Pages
 
 on:
   push:
@@ -24,6 +24,54 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore application source
+        run: |
+          python - <<'PY'
+          import base64, hashlib, io, lzma, pathlib, tarfile
+
+          parts = sorted(pathlib.Path('.buslens-source').glob('part-*.txt'))
+          if len(parts) != 7:
+              raise SystemExit(f'Expected 7 source segments, found {len(parts)}')
+          packed = base64.b64decode(''.join(p.read_text() for p in parts), validate=True)
+          expected = 'b092c20842f643d02a90f71361d64bca08ad7acda1ae85085780770a6adf83c8'
+          actual = hashlib.sha256(packed).hexdigest()
+          if actual != expected:
+              raise SystemExit(f'Source bundle checksum mismatch: {actual}')
+          raw = lzma.decompress(packed)
+          with tarfile.open(fileobj=io.BytesIO(raw)) as archive:
+              for item in archive.getmembers():
+                  path = pathlib.PurePosixPath(item.name)
+                  if path.is_absolute() or '..' in path.parts or item.issym() or item.islnk():
+                      raise SystemExit(f'Unsafe archive entry: {item.name}')
+                  if not (item.isfile() or item.isdir()):
+                      raise SystemExit(f'Unsupported archive entry: {item.name}')
+              archive.extractall('.', filter='data')
+          print(f'Restored {len(parts)} verified source segments')
+          PY
+
+      - name: Generate representative 3D models and public catalogue
+        run: |
+          python pipeline/generate_assets.py
+          python scripts/build_site.py
+
+      - name: Run application tests
+        run: |
+          python -m unittest discover -s tests -v
+          node --check web/js/app.js
+          node --check web/js/data.js
+          node --check web/js/viewer/three.js
+          node tests-js/smoke.js
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
@@ -32,7 +80,7 @@ jobs:
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: ./web
 
       - name: Deploy
         id: deployment
