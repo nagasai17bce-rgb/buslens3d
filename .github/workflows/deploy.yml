@@ -75,6 +75,7 @@ jobs:
           node --check web/js/data.js
           node --check web/js/viewer/three.js
           node tests-js/smoke.js
+          node tests-js/inventory.test.mjs
 
       - name: Install Playwright and Chromium
         run: |
