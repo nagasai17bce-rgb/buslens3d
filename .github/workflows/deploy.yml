@@ -61,7 +61,9 @@ jobs:
           PY
 
       - name: Prepare the static build and viewer
-        run: python .github/scripts/prepare_build.py
+        run: |
+          python .github/scripts/prepare_build.py
+          python .github/scripts/expose_e2e_inventory.py
 
       - name: Generate representative 3D models and public catalogue
         run: |
