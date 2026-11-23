@@ -66,6 +66,12 @@ try {
 
   await selector.selectOption(models[0]);
   await waitForModel(page, models[0]);
+  const fittings = await page.evaluate(() => {
+    const names=[];window.__BUSLENS_TEST_VIEWER__.model.traverse((node)=>names.push(node.name));
+    return Object.fromEntries(["curtain_","luggage_rack_","ac_vent_","cabin_light_","entry_door_glass","luggage_bay_","window_","wheel_"].map((prefix)=>[prefix,names.some((name)=>name.startsWith(prefix))]));
+  });
+  assert.ok(Object.values(fittings).every(Boolean), "Representative geometry must include cabin fittings and exterior doors, windows, wheels, and luggage bays.");
+  console.log("PASS representative interiors and exterior fittings are present.");
   for (const mode of ["inside", "outside", "cutaway"]) {
     await page.locator(`button.segment[data-mode="${mode}"]`).click();
     await page.waitForFunction((value) => document.querySelector("#bus-viewer")?.dataset.viewMode === value, mode);
@@ -87,8 +93,37 @@ try {
   await seat.click();
   await page.waitForFunction((id) => document.querySelector("#bus-viewer canvas")?.dataset.selectedSeat === id, seatId);
   assert.equal(await seat.getAttribute("aria-pressed"), "true");
+  assert.match(await page.locator("#inventory-detail").textContent(), /No authorised live seat feed/i);
   await seatMap.screenshot({ path: path.join(output, "seat-map-selected.png") });
   console.log("PASS 2D seat selection and synchronization with the 3D viewer.");
+
+  await page.getByRole("button", { name: "Look from this position" }).click();
+  await page.waitForFunction((id) => document.querySelector("#bus-viewer")?.dataset.cameraSeat === id, seatId);
+  const pov = await page.evaluate((id) => {
+    const viewer = window.__BUSLENS_TEST_VIEWER__;
+    const object = viewer.seats.get(id);
+    const expected = object.getWorldPosition(viewer.camera.position.clone());
+    expected.y += object.userData.kind === "berth" ? .38 : .78;
+    return { expected: expected.toArray(), actual: viewer.camera.position.toArray(), yaw: viewer.camera.rotation.y,
+      deck: viewer.container.dataset.cameraDeck, kind: viewer.container.dataset.cameraKind };
+  }, seatId);
+  assert.ok(pov.expected.every((v, i) => Math.abs(v - pov.actual[i]) < .002), "POV camera must use the selected seat's world position plus its eye-height offset.");
+  assert.ok(Math.abs(pov.yaw - Math.PI / 2) < .02, "POV camera must face the bus front along the seat orientation.");
+  console.log(`PASS per-seat POV uses exact model coordinates (${pov.deck} ${pov.kind}).`);
+  await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.exitSeatPOV());
+
+  const upperSeat = seatMap.locator('.seat-map-seat[data-seat-id^="UPPER-"]').first();
+  const upperId = await upperSeat.getAttribute("data-seat-id");
+  assert.ok(upperId, "The representative sleeper layout must expose an upper berth.");
+  await page.locator("#compare-add-button").click();
+  await upperSeat.click();
+  await page.locator("#compare-add-button").click();
+  assert.equal(await page.locator("#seat-compare-list .compare-row").count(), 2, "Two positions can be compared.");
+  await page.locator(`[data-compare-view="${upperId}"]`).click();
+  await page.waitForFunction((id) => document.querySelector("#bus-viewer")?.dataset.cameraSeat === id, upperId);
+  assert.equal(await page.locator("#bus-viewer").getAttribute("data-camera-deck"), "upper");
+  console.log("PASS lower/upper berth comparison switches to the corresponding seat camera.");
+  await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.exitSeatPOV());
 
   await page.locator('button.segment[data-deck="both"]').click();
   await page.locator('button.segment[data-mode="inside"]').click();
@@ -123,11 +158,50 @@ try {
   await page.waitForTimeout(250);
   const zoomed = await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.camera.position.toArray());
   assert.ok(zoomed.some((v, i) => Math.abs(v - rotated[i]) > 0.05), "Wheel must zoom the camera.");
+  const targetBeforePan = await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.controls.target.toArray());
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down({ button: "right" });
+  await page.mouse.move(box.x + box.width / 2 + 65, box.y + box.height / 2 + 22, { steps: 6 });
+  await page.mouse.up({ button: "right" });
+  await page.waitForTimeout(300);
+  const targetAfterPan = await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.controls.target.toArray());
+  assert.ok(targetAfterPan.some((v, i) => Math.abs(v - targetBeforePan[i]) > 0.01), "Right-drag must pan the model.");
   await page.locator("#reset-camera").click();
   await page.waitForTimeout(350);
   const reset = await page.evaluate(() => window.__BUSLENS_TEST_VIEWER__.camera.position.toArray());
   assert.ok(reset.every((v, i) => Math.abs(v - camera[i]) < 0.25), "Reset must restore camera framing.");
-  console.log("PASS orbit, zoom, and reset.");
+  console.log("PASS orbit, zoom, pan, and reset.");
+
+  await page.locator('button.segment[data-deck="2d"]').click();
+  await page.locator(`[data-seat-id="${seatId}"]`).click();
+  const simulation = await page.evaluate(async (selectedId) => {
+    const inventory = window.__BUSLENS_TEST_INVENTORY__;
+    const ids = [...document.querySelectorAll("#seat-map-2d .seat-map-seat[data-seat-id]")].map((node) => node.dataset.seatId);
+    const otherId = ids.find((id) => id !== selectedId);
+    inventory.adapter = {
+      getInventory: async () => ({ authorized: true, feedAvailable: true, seats: [
+        { seatId: selectedId, status: "available" }, { seatId: otherId, status: "available" },
+      ] }),
+      revalidate: async (_service, seatId) => ({ authorized: true, feedAvailable: true, seatId, status: "unavailable" }),
+    };
+    await inventory.openService({ providerId: "test-only-mock", routeId: "simulation", date: "2030-01-01" });
+    return { otherId };
+  }, seatId);
+  assert.match(await page.locator("#inventory-detail").textContent(), /Provider inventory is separate/i);
+  await page.waitForFunction((id) => document.querySelector(`[data-seat-id="${id}"]`)?.dataset.status === "selected", seatId);
+  assert.equal(await page.locator(`[data-seat-id="${simulation.otherId}"]`).getAttribute("data-status"), "available");
+  assert.equal(await page.evaluate((id) => window.__BUSLENS_TEST_VIEWER__.availability.get(id), simulation.otherId), "available");
+  await page.evaluate(async (id) => window.__BUSLENS_TEST_INVENTORY__.revalidate({ routeId: "simulation" }, id), seatId);
+  await page.waitForFunction((id) => document.querySelector(`[data-seat-id="${id}"]`)?.dataset.status === "unavailable", seatId);
+  assert.equal(await page.evaluate((id) => window.__BUSLENS_TEST_VIEWER__.availability.get(id), seatId), "unavailable");
+  assert.equal(await page.evaluate(() => window.__BUSLENS_TEST_INVENTORY__.canHandoff), false);
+  console.log("PASS test-only mock simulation syncs 2D/3D status and blocks a confirmed conflict; this is not live provider data.");
+  await page.evaluate(async () => {
+    const inventory = window.__BUSLENS_TEST_INVENTORY__;
+    inventory.adapter = null;
+    await inventory.openService({ routeId: "no-feed" });
+  });
+  await page.locator('button.segment[data-deck="both"]').click();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(250);
